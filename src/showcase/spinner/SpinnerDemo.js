@@ -1,36 +1,24 @@
 import React, { Component } from 'react';
-import {Link} from 'react-router';
+import {Link} from 'react-router-dom';
 import {Spinner} from '../../components/spinner/Spinner';
 import {TabView,TabPanel} from '../../components/tabview/TabView';
-import {CodeHighlight} from '../../components/codehighlight/CodeHighlight';
+import {CodeHighlight} from '../codehighlight/CodeHighlight';
 
 export class SpinnerDemo extends Component {
 
     constructor() {
         super();
-        this.state = {};
-
-        this.onChangeBasic = this.onChangeBasic.bind(this);
-        this.onChangeMinMax = this.onChangeMinMax.bind(this);
-        this.onChangeStep = this.onChangeStep.bind(this);
-    }
-
-    onChangeBasic(e) {
-        this.setState({ value: e.value });
-    }
-
-    onChangeMinMax(e) {
-        this.setState({ value2: e.value });
-    }
-
-    onChangeStep(e) {
-        this.setState({ value3: e.value });
+        this.state = {
+            value1: null,
+            value2: null,
+            value3: null
+        };
     }
 
     render() {
         return (
             <div>
-                <div className="content-section">
+                <div className="content-section introduction">
                     <div className="feature-intro">
                         <h1>Spinner</h1>
                         <p>Spinner is an input component to provide a numerical input.</p>
@@ -38,18 +26,19 @@ export class SpinnerDemo extends Component {
                 </div>
 
                 <div className="content-section implementation">
-                    <h3>Basic: {this.state.value}</h3>
-                    <Spinner value={this.state.value} size={30} onChange={this.onChangeBasic} />
+                    <h3>Basic</h3>
+                    <Spinner value={this.state.value1} size={30} onChange={(e) => this.setState({value1: e.value})} />
 
-                    <h3>Min/Max: {this.state.value2}</h3>
-                    <Spinner value={this.state.value2} size={30} onChange={this.onChangeMinMax} min={0} max={100} />
+                    <h3>Min/Max</h3>
+                    <Spinner value={this.state.value2} size={30} onChange={(e) => this.setState({value2: e.value})} min={0} max={100} />
 
-                    <h3>Step: {this.state.value3}</h3>
-                    <Spinner value={this.state.value3} size={30} onChange={this.onChangeStep} step={0.25} />
+                    <h3>Step</h3>
+                    <Spinner value={this.state.value3} size={30} onChange={(e) => this.setState({value3: e.value})} step={0.25} />
 
                     <h3>Disabled</h3>
                     <Spinner value={this.state.value4} size={30} disabled={true} />
                 </div>
+
                 <SpinnerDoc></SpinnerDoc>
             </div>
         );
@@ -58,64 +47,52 @@ export class SpinnerDemo extends Component {
 
 class SpinnerDoc extends Component {
 
+    shouldComponentUpdate(){
+        return false;
+    }
+
     render() {
         return (
-            <div className="content-section source">
+            <div className="content-section documentation">
     <TabView effect="fade">
         <TabPanel header="Documentation">
             <h3>Import</h3>
 <CodeHighlight className="language-javascript">
 {`
-import {Spinner} from 'primereact/components/spinner/Spinner';
+import {Spinner} from 'primereact/spinner';
 
 `}
 </CodeHighlight>
 
             <h3>Getting Started</h3>
-            <p>Slider is used as a controlled input with dragging of a handle.</p>
+            <p>Spinner is used as a controlled input with <i>value</i> and <i>onChange</i> properties. Note that onChange is triggered on blur instead of on key input</p>
                     
-<CodeHighlight className="language-markup">
+<CodeHighlight className="language-jsx">
 {`
-<Spinner value={this.state.value} size={30} onChange={this.onChangeBasic} />
-
-`}
-</CodeHighlight>
-
-<CodeHighlight className="language-javascript">
-{`
-constructor() {
-    super();
-    this.state = {};
-
-    this.onChangeBasic = this.onChangeBasic.bind(this);
-}
-
-onChangeBasic(e) {
-    this.setState({ value: e.value });
-}
+<Spinner value={this.state.value} onChange={(e) => this.setState({value: e.value})} />
 
 `}
 </CodeHighlight>
 
             <h3>Min-Max</h3>
-            <p>Boundaries are specified with min and max attributes.</p>
-<CodeHighlight className="language-markup">
+            <p>Boundaries are specified with <i>min</i> and <i>max</i> attributes.</p>
+<CodeHighlight className="language-jsx">
 {`
-<Spinner value={this.state.value2} size={30} onChange={this.onChangeMinMax} min={0} max={100} />
+<Spinner value={this.state.value} onChange={(e) => this.setState({value: e.value})} min={0} max={100} />
 
 `}
 </CodeHighlight>
 
             <h3>Step</h3>
-            <p>Step factor is 1 by default and can be customized with step option.</p>
-<CodeHighlight className="language-markup">
+            <p>Step factor is 1 by default and can be customized with <i>step</i> option.</p>
+<CodeHighlight className="language-jsx">
 {`
-<Spinner value={this.state.value3} size={30} onChange={this.onChangeStep} step={0.25} />
+<Spinner value={this.state.value} onChange={(e) => this.setState({value: e.value})} step={0.25} />
 
 `}
 </CodeHighlight>
 
-            <h3>Attributes</h3>
+            <h3>Properties</h3>
             <div className="doc-tablewrapper">
                 <table className="doc-table">
                     <thead>
@@ -127,6 +104,24 @@ onChangeBasic(e) {
                         </tr>
                     </thead>
                     <tbody>
+                        <tr>
+                            <td>id</td>
+                            <td>string</td>
+                            <td>null</td>
+                            <td>Unique identifier of the element.</td>
+                        </tr>
+                        <tr>
+                            <td>value</td>
+                            <td>string</td>
+                            <td>null</td>
+                            <td>Value of the component.</td>
+                         </tr>
+                         <tr>
+                            <td>name</td>
+                            <td>string</td>
+                            <td>null</td>
+                            <td>Name of the input element.</td>
+                        </tr>
                          <tr>
                             <td>step</td>
                             <td>number</td>
@@ -170,18 +165,6 @@ onChangeBasic(e) {
                             <td>Size of the input field.</td>
                         </tr>
                         <tr>
-                            <td>decimalSeparator</td>
-                            <td>numstringber</td>
-                            <td>.</td>
-                            <td>Separator character for decimals.</td>
-                        </tr>
-                        <tr>
-                            <td>thousandSeparator</td>
-                            <td>string</td>
-                            <td>,</td>
-                            <td>Separator character for thousands.</td>
-                        </tr>
-                        <tr>
                             <td>style</td>
                             <td>string</td>
                             <td>null</td>
@@ -192,6 +175,54 @@ onChangeBasic(e) {
                             <td>string</td>
                             <td>null</td>
                             <td>Style class of the element.</td>
+                        </tr>
+                        <tr>
+                            <td>inputId</td>
+                            <td>string</td>
+                            <td>null</td>
+                            <td>Identifier of the input element.</td>
+                        </tr>
+                        <tr>
+                            <td>inputStyle</td>
+                            <td>string</td>
+                            <td>null</td>
+                            <td>Inline style of the input field.</td>
+                        </tr>
+                        <tr>
+                            <td>inputClassName</td>
+                            <td>string</td>
+                            <td>null</td>
+                            <td>Inline style of the input field.</td>
+                        </tr>
+                        <tr>
+                            <td>tooltip</td>
+                            <td>any</td>
+                            <td>null</td>
+                            <td>Content of the tooltip.</td>
+                        </tr>
+                        <tr>
+                            <td>tooltipOptions</td>
+                            <td>object</td>
+                            <td>null</td>
+                            <td>Configuration of the tooltip, refer to the tooltip documentation for more information.</td>
+                        </tr>
+                        <tr>
+                            <td>decimalSeparator</td>
+                            <td>string</td>
+                            <td>null</td>
+                            <td>Separator character for decimals, defaults to settings at user locale.</td>
+                        </tr>
+                        <tr>
+                            <td>thousandSeparator</td>
+                            <td>string</td>
+                            <td>null</td>
+                            <td>Separator character for thousands, defaults to settings at user locale.</td>
+                        </tr>
+                        <tr>
+                            <td>formatInput</td>
+                            <td>boolean</td>
+                            <td>false</td>
+                            <td>When present, formats the user input at blur event.</td>
                         </tr>
                     </tbody>
                 </table>
@@ -210,26 +241,17 @@ onChangeBasic(e) {
                     <tbody>
                         <tr>
                             <td>onChange</td>
-                            <td>event: Change event</td>
+                            <td>event.value: New value</td>
                             <td>Callback to invoke on value change.</td>
                         </tr>
+                        <tr>
+                            <td>onBlur</td>
+                            <td>event: Browser event</td>
+                            <td>Callback to invoke when Spinner loses focus.</td>
+                        </tr> 
                     </tbody>
                 </table>
             </div>
-<CodeHighlight className="language-markup">
-{`
-<Slider style={{ width: '200px' }} onChange={this.onChangeSlider1} />
-
-`}
-</CodeHighlight>
-<CodeHighlight className="language-javascript">
-{`
-onChangeSlider1(e) {
-    this.setState({ val1: e.value });
-}
-
-`}
-</CodeHighlight>
 
             <h3>Styling</h3>
             <p>Following is the list of structural style classes, for theming classes visit <Link to="/theming"> theming</Link> page.</p>
@@ -243,16 +265,20 @@ onChangeSlider1(e) {
                     </thead>
                     <tbody>
                         <tr>
-                            <td>ui-spinner</td>
+                            <td>p-spinner</td>
                             <td>Container element</td>
                         </tr>
                         <tr>
-                            <td>ui-spinner-up</td>
-                            <td>Up element</td>
+                            <td>p-spinner-up</td>
+                            <td>Up icon.</td>
                         </tr>
                         <tr>
-                            <td>ui-spinner-down</td>
-                            <td>Down element</td>
+                            <td>p-spinner-down</td>
+                            <td>Down icon.</td>
+                        </tr>
+                        <tr>
+                            <td>p-spinner-input</td>
+                            <td>Input element</td>
                         </tr>
                     </tbody>
                 </table>
@@ -263,35 +289,29 @@ onChangeSlider1(e) {
         </TabPanel>
 
         <TabPanel header="Source">
+            <a href="https://github.com/primefaces/primereact/tree/master/src/showcase/spinner" className="btn-viewsource" target="_blank" rel="noopener noreferrer">
+                <span>View on GitHub</span>
+            </a>
 <CodeHighlight className="language-javascript">
 {`
+import React, {Component} from 'react';
+import {Spinner} from 'primereact/spinner';
+
 export class SpinnerDemo extends Component {
 
     constructor() {
         super();
-        this.state = {};
-
-        this.onChangeBasic = this.onChangeBasic.bind(this);
-        this.onChangeMinMax = this.onChangeMinMax.bind(this);
-        this.onChangeStep = this.onChangeStep.bind(this);
-    }
-
-    onChangeBasic(e) {
-        this.setState({ value: e.value });
-    }
-
-    onChangeMinMax(e) {
-        this.setState({ value2: e.value });
-    }
-
-    onChangeStep(e) {
-        this.setState({ value3: e.value });
+        this.state = {
+            value1: null,
+            value2: null,
+            value3: null
+        };
     }
 
     render() {
         return (
             <div>
-                <div className="content-section">
+                <div className="content-section introduction">
                     <div className="feature-intro">
                         <h1>Spinner</h1>
                         <p>Spinner is an input component to provide a numerical input.</p>
@@ -299,19 +319,18 @@ export class SpinnerDemo extends Component {
                 </div>
 
                 <div className="content-section implementation">
-                    <h3>Basic: {this.state.value}</h3>
-                    <Spinner value={this.state.value} size={30} onChange={this.onChangeBasic} />
+                    <h3>Basic</h3>
+                    <Spinner value={this.state.value1} size={30} onChange={(e) => this.setState({value1: e.value})} />
 
-                    <h3>Min/Max: {this.state.value2}</h3>
-                    <Spinner value={this.state.value2} size={30} onChange={this.onChangeMinMax} min={0} max={100} />
+                    <h3>Min/Max</h3>
+                    <Spinner value={this.state.value2} size={30} onChange={(e) => this.setState({value2: e.value})} min={0} max={100} />
 
-                    <h3>Step: {this.state.value3}</h3>
-                    <Spinner value={this.state.value3} size={30} onChange={this.onChangeStep} step={0.25} />
+                    <h3>Step</h3>
+                    <Spinner value={this.state.value3} size={30} onChange={(e) => this.setState({value3: e.value})} step={0.25} />
 
                     <h3>Disabled</h3>
                     <Spinner value={this.state.value4} size={30} disabled={true} />
                 </div>
-                <SpinnerDoc></SpinnerDoc>
             </div>
         );
     }

@@ -1,81 +1,93 @@
-import React, {Component} from 'react';
+import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import classNames from 'classnames';
+import { UIMessage } from './UIMessage';
+import { CSSTransition, TransitionGroup } from 'react-transition-group';
+
+var messageIdx = 0;
 
 export class Messages extends Component {
 
     static defaultProps = {
-        closable: true,
+        id: null,
         className: null,
         style: null,
-        onClear: null
+        onRemove: null,
+        onClick: null
     }
 
     static propTypes = {
-        closable: PropTypes.bool,
+        id: PropTypes.string,
         className: PropTypes.string,
         style: PropTypes.object,
-        onClear: PropTypes.func
+        onRemove: PropTypes.func,
+        onClick: PropTypes.func
     };
 
     constructor(props) {
         super(props);
-        this.state = {messages:this.props.value};
-        this.clear = this.clear.bind(this);
-    }
-
-    componentWillReceiveProps(nextProps) {
-        this.setState({messages:nextProps.value});
-    }
-
-    clear(event) {
-        this.setState({messages:[]});
-        if(this.props.onClear) {
-            this.props.onClear();
+        this.state = {
+            messages: []
         }
-        event.preventDefault();
+
+        this.onClose = this.onClose.bind(this);
+    }
+
+    show(value) {
+        if (value) {
+            let newMessages = [];
+
+            if (Array.isArray(value)) {
+                for (let i = 0; i < value.length; i++) {
+                    value[i].id = messageIdx++;
+                    newMessages = [...this.state.messages, ...value];
+                }
+            }
+            else {
+                value.id = messageIdx++;
+                newMessages = this.state.messages ? [...this.state.messages, value] : [value];
+            }
+
+            this.setState({
+                messages: newMessages
+            });
+        }
+    }
+
+    clear() {
+        this.setState({
+            messages: []
+        })
+    }
+
+    replace(value) {
+        this.setState({
+            messages: [],
+        }, () => this.show(value));
+    }
+
+    onClose(message) {
+        let newMessages = this.state.messages.filter(msg => msg.id !== message.id);
+        this.setState({
+            messages: newMessages
+        });
+
+        if (this.props.onRemove) {
+            this.props.onRemove(message);
+        }
     }
 
     render() {
-        if(this.state.messages && this.state.messages.length) {
-            var firstMessage = this.state.messages[0];
-            var severity = firstMessage.severity||'info';
-
-            var className = classNames('ui-messages ui-widget ui-corner-all', {
-                'ui-messages-info': severity === 'info',
-                'ui-messages-warn': severity === 'warn',
-                'ui-messages-error': severity === 'error',
-                'ui-messages-success': severity === 'success'
-            });
-
-            var icon = classNames('ui-messages-icon fa fa-fw fa-2x', {
-                'fa-info': severity === 'info',
-                'fa-warning': severity === 'warn',
-                'fa-close': severity === 'error',
-                'fa-check': severity === 'success',
-            });
-
-            if(this.props.closable) {
-                var closeIcon = <a href="#" className="ui-messages-close" onClick={this.clear}>
-                                <i className="fa fa-close"></i>
-                            </a>;
-            }
-
-            return <div className={className} style={this.props.style} ref={(el) => {this.container = el;}}>
-                      {closeIcon}
-                      <span className={icon}></span>
-                      <ul>
-                        {this.state.messages.map((msg) => {
-                          return <li key={msg.summary + msg.detail}>
-                                    <span className="ui-messages-summary">{msg.summary}</span>
-                                    <span className="ui-messages-detail">{msg.detail}</span>
-                                </li>;  
-                        })}
-                      </ul>
-                   </div>;
-        }
-        else {
-            return null;
-        }   
+        return (
+            <div id={this.props.id} className={this.props.className} style={this.props.style}>
+                <TransitionGroup >
+                    {this.state.messages.map((message, index) =>
+                        <CSSTransition key={message.id} classNames="p-messages"
+                            timeout={{ enter: 250, exit: 500 }}>
+                            <UIMessage message={message} onClick={this.props.onClick} onClose={this.onClose} />
+                        </CSSTransition>
+                    )}
+                </TransitionGroup>
+            </div>
+        );  
     }
 }

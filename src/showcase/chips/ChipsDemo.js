@@ -1,20 +1,24 @@
 import React, {Component} from 'react';
-import {Link} from 'react-router';
+import {Link} from 'react-router-dom';
 import {Chips} from '../../components/chips/Chips';
 import {TabView,TabPanel} from '../../components/tabview/TabView';
-import {CodeHighlight} from '../../components/codehighlight/CodeHighlight';
+import {CodeHighlight} from '../codehighlight/CodeHighlight';
 
 export class ChipsDemo extends Component {
-    constructor(props) {
-        super(props);
-        this.state = {basicValues: [], advancedValues: []};
+
+    constructor() {
+        super();
+        this.state = {
+            values1: [], 
+            values2: []
+        };
     }
 
-    customTemplate(item) {
+    customChip(item) {
         return (
             <div>
                 <span>{item} - (active) </span>
-                <i className="fa fa-user"></i>
+                <i className="pi pi-user-plus" style={{fontSize: '14px'}}></i>
             </div>
         );
     }
@@ -22,19 +26,19 @@ export class ChipsDemo extends Component {
     render() {
         return (
             <div>
-                <div className="content-section">
+                <div className="content-section introduction">
                     <div className="feature-intro">
                         <h1>Chips</h1>
-                        <p>Chips is used to enter multiple values on an inputfield.</p>
+                        <p>Chips is used to enter multiple values on an input field.</p>
                     </div>
                 </div>
 
-                <div className="content-section implementation">
+                <div className="content-section implementation p-fluid">
                     <h3>Basic</h3>
-                    <Chips value={this.state.basicValues}></Chips>
+                    <Chips value={this.state.values1} onChange={(e) => this.setState({values1: e.value})}></Chips>
 
-                    <h3>Advanced</h3>
-                    <Chips value={this.state.advancedValues} max={5} itemTemplate={this.customTemplate}></Chips>
+                    <h3>Template</h3>
+                    <Chips value={this.state.values2} onChange={(e) => this.setState({values2: e.value})} max={5} itemTemplate={this.customChip}></Chips>
                 </div>
                 
                 <ChipsDoc/>
@@ -44,62 +48,57 @@ export class ChipsDemo extends Component {
 }
 
 class ChipsDoc extends Component {
+
+    shouldComponentUpdate(){
+        return false;
+    }
     
     render() {
         return (
-            <div className="content-section source">
+            <div className="content-section documentation">
     <TabView effect="fade">
         <TabPanel header="Documentation">
             <h3>Import</h3>
 <CodeHighlight className="language-javascript">
 {`
-import {Chips} from 'primereact/components/chips/Chips';
+import {Chips} from 'primereact/chips';
 
 `}
 </CodeHighlight>
 
             <h3>Getting Started</h3>
-            <p>Chips requires an array as its value.</p>
+            <p>Chips requires an array as its <i>value</i> and <i>onChange</i> callback to update the model.</p>
                     
-<CodeHighlight className="language-markup">
+<CodeHighlight className="language-jsx">
 {`
-<Chips value={this.state.basicValues}></Chips>
-
-`}
-</CodeHighlight>
-
-<CodeHighlight className="language-javascript">
-{`
-constructor(props) {
-    super(props);
-    this.state = {basicValues: [], advancedValues: []};
-}
+<Chips value={this.state.value} onChange={(e) => this.setState({value: e.value})}></Chips>
 
 `}
 </CodeHighlight>
 
             <h3>Custom Content</h3>
-            <p>A chip is customized using a template element where the value is passed as the implicit variable.</p>
-<CodeHighlight className="language-markup">
+            <p>A chip is customized using <i>itemTemplate</i> function where value is passed to return JSX.</p>
+<CodeHighlight className="language-jsx">
 {`
-<Chips value={this.state.advancedValues} max={5} itemTemplate={this.customTemplate}></Chips>
+<Chips value={this.state.value} onChange={(e) => this.setState({value: e.value})} itemTemplate={this.customChip}></Chips>
 
 `}
 </CodeHighlight>
-<CodeHighlight className="language-markup">
+<CodeHighlight className="language-javascript">
 {`
-customTemplate(item) {
+customChip(item) {
     return (
         <div>
             <span>{item} - (active) </span>
-            <i className="fa fa-user"></i>
+            <i className="pi pi-user-plus"></i>
         </div>
     );
 }
 
 `}
 </CodeHighlight>
-            <h3>Attributes</h3>
+
+            <h3>Properties</h3>
             <div className="doc-tablewrapper">
                 <table className="doc-table">
                     <thead>
@@ -111,23 +110,35 @@ customTemplate(item) {
                         </tr>
                     </thead>
                     <tbody>
-                         <tr>
-                            <td>field</td>
+                        <tr>
+                            <td>id</td>
                             <td>string</td>
                             <td>null</td>
-                            <td>Name of the property to display on a chip.</td>
+                            <td>Unique identifier of the component.</td>
+                        </tr>
+                        <tr>
+                            <td>name</td>
+                            <td>string</td>
+                            <td>null</td>
+                            <td>Name of the input field.</td>
+                        </tr>
+                        <tr>
+                            <td>placeholder</td>
+                            <td>string</td>
+                            <td>null</td>
+                            <td>Advisory information to display on input.</td>
+                        </tr>
+                        <tr>
+                            <td>value</td>
+                            <td>array</td>
+                            <td>null</td>
+                            <td>Value of the component.</td>
                         </tr>
                         <tr>
                             <td>max</td>
                             <td>number</td>
                             <td>null</td>
                             <td>Maximum number of entries allowed.</td>
-                        </tr>
-                        <tr>
-                            <td>value</td>
-                            <td>array</td>
-                            <td>null</td>
-                            <td>Value of the chips.</td>
                         </tr>
                         <tr>
                             <td>disabled</td>
@@ -148,17 +159,23 @@ customTemplate(item) {
                             <td>Style class of the element.</td>
                         </tr>
                         <tr>
-                            <td>placeholder</td>
-                            <td>string</td>
+                            <td>tooltip</td>
+                            <td>any</td>
                             <td>null</td>
-                            <td>Advisory information to display on input.</td>
+                            <td>Content of the tooltip.</td>
                         </tr>
-                         <tr>
-                           <td>tabindex</td>
-                           <td>number</td>
-                           <td>null</td>
-                           <td>Index of the element in tabbing order.</td>
-                         </tr>
+                        <tr>
+                            <td>tooltipOptions</td>
+                            <td>object</td>
+                            <td>null</td>
+                            <td>Configuration of the tooltip, refer to the tooltip documentation for more information.</td>
+                        </tr>
+                        <tr>
+                            <td>itemTemplate</td>
+                            <td>function</td>
+                            <td>null</td>
+                            <td>Template function to return the content of a chip.</td>
+                        </tr>
                     </tbody>
                 </table>
             </div>
@@ -175,17 +192,33 @@ customTemplate(item) {
                     </thead>
                     <tbody>
                         <tr>
+                            <td>onChange</td>
+                            <td>originalEvent: Browser event <br/>
+                                value: New value of the component</td>
+                            <td>Callback to invoke when a chip is added or removed.</td>
+                        </tr>
+                        <tr>
                             <td>onAdd</td>
                             <td>originalEvent: Browser event <br/>
                                 value: Added item value</td>
-                            <td>Callback to invoke when a value is added.</td>
+                            <td>Callback to invoke when a chip is added.</td>
                         </tr>
                         <tr>
                             <td>onRemove</td>
                             <td>originalEvent: Browser event <br/>
-                                value: Added item value</td>
-                            <td>Callback to invoke when a value is removed.</td>
+                                value: Removed item value</td>
+                            <td>Callback to invoke when a chip is removed.</td>
                         </tr>
+                        <tr>
+                            <td>onFocus</td>
+                            <td>event: Browser event</td>
+                            <td>Callback to invoke when the component gets focus.</td>
+                        </tr> 
+                        <tr>
+                            <td>onBlur</td>
+                            <td>event: Browser event</td>
+                            <td>Callback to invoke when the component loses focus.</td>
+                        </tr>  
                     </tbody>
                 </table>
             </div>
@@ -202,23 +235,23 @@ customTemplate(item) {
                     </thead>
                     <tbody>
                         <tr>
-                            <td>ui-chips</td>
+                            <td>p-chips</td>
                             <td>Container element</td>
                         </tr>
                         <tr>
-                            <td>ui-chips-token</td>
+                            <td>p-chips-token</td>
                             <td>Chip element container.</td>
                         </tr>
                         <tr>
-                            <td>ui-chips-token-icon</td>
+                            <td>p-chips-token-icon</td>
                             <td>Icon of a chip.</td>
                         </tr>
                         <tr>
-                            <td>ui-chips-token-label</td>
+                            <td>p-chips-token-label</td>
                             <td>label of a chip.</td>
                         </tr>
                         <tr>
-                            <td>ui-chips-input-token</td>
+                            <td>p-chips-input-token</td>
                             <td>Container of input element.</td>
                         </tr>
                     </tbody>
@@ -230,19 +263,29 @@ customTemplate(item) {
         </TabPanel>
 
         <TabPanel header="Source">
+            <a href="https://github.com/primefaces/primereact/tree/master/src/showcase/chips" className="btn-viewsource" target="_blank" rel="noopener noreferrer">
+                <span>View on GitHub</span>
+            </a>
 <CodeHighlight className="language-javascript">
 {`
+import React, {Component} from 'react';
+import {Chips} from 'primereact/chips';
+
 export class ChipsDemo extends Component {
-    constructor(props) {
-        super(props);
-        this.state = {basicValues: [], advancedValues: []};
+
+    constructor() {
+        super();
+        this.state = {
+            values1: [], 
+            values2: []
+        };
     }
 
-    customTemplate(item) {
+    customChip(item) {
         return (
             <div>
                 <span>{item} - (active) </span>
-                <i className="fa fa-user"></i>
+                <i className="pi pi-user-plus" style={{fontSize: '14px'}}></i>
             </div>
         );
     }
@@ -250,22 +293,20 @@ export class ChipsDemo extends Component {
     render() {
         return (
             <div>
-                <div className="content-section">
+                <div className="content-section introduction">
                     <div className="feature-intro">
                         <h1>Chips</h1>
-                        <p>Chips is used to enter multiple values on an inputfield.</p>
+                        <p>Chips is used to enter multiple values on an input field.</p>
                     </div>
                 </div>
 
-                <div className="content-section implementation">
+                <div className="content-section implementation p-fluid">
                     <h3>Basic</h3>
-                    <Chips value={this.state.basicValues}></Chips>
+                    <Chips value={this.state.values1} onChange={(e) => this.setState({values1: e.value})}></Chips>
 
-                    <h3>Advanced</h3>
-                    <Chips value={this.state.advancedValues} max={5} itemTemplate={this.customTemplate}></Chips>
+                    <h3>Template</h3>
+                    <Chips value={this.state.values2} onChange={(e) => this.setState({values2: e.value})} max={5} itemTemplate={this.customChip}></Chips>
                 </div>
-                
-                <ChipsDoc/>
             </div>
         )
     }

@@ -1,15 +1,16 @@
 import React, {Component} from 'react';
-import {Link} from 'react-router';
+import {Link} from 'react-router-dom';
 import {InputTextarea} from '../../components/inputtextarea/InputTextarea';
 import {TabView,TabPanel} from '../../components/tabview/TabView';
-import {CodeHighlight} from '../../components/codehighlight/CodeHighlight';
+import {CodeHighlight} from '../codehighlight/CodeHighlight';
 
 export class InputTextareaDemo extends Component {
         
     constructor() {
         super();
-        this.state = {value: 'Welcome to Prime!'};
-        this.handleChange = this.handleChange.bind(this);
+        this.state = {
+            value: 'Welcome to PrimeLand!'
+        };
     }
 
     handleChange(e) {
@@ -19,7 +20,7 @@ export class InputTextareaDemo extends Component {
     render() {
         return (
             <div>
-                <div className="content-section">
+                <div className="content-section introduction">
                     <div className="feature-intro">
                         <h1>InputTextarea</h1>
                         <p>Inputtextarea add styling and autoResize functionality to standard textarea element.</p>
@@ -28,7 +29,7 @@ export class InputTextareaDemo extends Component {
 
                 <div className="content-section implementation">
                     <h3>Default</h3>
-                    <InputTextarea value={this.state.value} onChange={this.handleChange} rows={5} cols={30}></InputTextarea>
+                    <InputTextarea value={this.state.value} onChange={(e) => this.setState({value: e.target.value})} rows={5} cols={30}></InputTextarea>
                     <div>{this.state.value}</div>
 
                     <h3>AutoResize</h3>
@@ -43,32 +44,26 @@ export class InputTextareaDemo extends Component {
 
 class InputTextareaDoc extends Component {
 
+    shouldComponentUpdate(){
+        return false;
+    }
+
     render() {
         return (
-            <div className="content-section source">
+            <div className="content-section documentation">
                 <TabView>
                     <TabPanel header="Documentation">
                         <h3>Import</h3>
 <CodeHighlight className="language-javascript">
 {`
-import {InputTextarea} from 'primereact/components/inputtextarea/InputTextarea';
+import {InputTextarea} from 'primereact/inputtextarea';
 
 `}
 </CodeHighlight>
 
                         <h3>Getting Started</h3>
-                        <p>Textarea is defined using the InputTextarea element with standard attributes of a textarea element.</p>
-                        
-<CodeHighlight className="language-markup">
-{`
-<InputTextarea rows={5} cols={30} />
-
-`}
-</CodeHighlight>
-
-                        <h3>Controlled Input</h3>
-                        <p>Textarea is used as a controlled input with value and onChange properties.</p>
-<CodeHighlight className="language-markup">
+                        <p>Textarea is used as a controlled input with <i>value</i> and <i>onChange</i> properties.</p>
+<CodeHighlight className="language-jsx">
 {`
 <InputTextarea rows={5} cols={30} value={this.state.value} onChange={(e) => this.setState({value: e.target.value})} />
 
@@ -77,14 +72,14 @@ import {InputTextarea} from 'primereact/components/inputtextarea/InputTextarea';
 
                         <h3>AutoResize</h3>
                         <p>In auto resize mode, textarea grows instead of displaying a scrollbar.</p>
-<CodeHighlight className="language-markup">
+<CodeHighlight className="language-jsx">
 {`
-<InputTextarea rows={5} cols={30} autoResize={true} />
+<InputTextarea rows={5} cols={30} value={this.state.value} onChange={(e) => this.setState({value: e.target.value})} autoResize={true} />
 
 `}
 </CodeHighlight>
 
-                        <h3>Attributes</h3>
+                        <h3>Properties</h3>
                         <p>InputTextarea passes any attribute to the underlying textarea element, additional attributes are as follows;</p>
                         <div className="doc-tablewrapper">
                             <table className="doc-table">
@@ -103,6 +98,18 @@ import {InputTextarea} from 'primereact/components/inputtextarea/InputTextarea';
                                         <td>false</td>
                                         <td>When present, height of textarea changes as being typed.</td>
                                     </tr>
+                                    <tr>
+                                        <td>tooltip</td>
+                                        <td>any</td>
+                                        <td>null</td>
+                                        <td>Content of the tooltip.</td>
+                                    </tr>
+                                    <tr>
+                                        <td>tooltipOptions</td>
+                                        <td>object</td>
+                                        <td>null</td>
+                                        <td>Configuration of the tooltip, refer to the tooltip documentation for more information.</td>
+                                    </tr>
                                 </tbody>
                             </table>
                         </div>
@@ -119,7 +126,7 @@ import {InputTextarea} from 'primereact/components/inputtextarea/InputTextarea';
                                 </thead>
                                 <tbody>
                                     <tr>
-                                        <td>ui-inputtextarea</td>
+                                        <td>p-inputtextarea</td>
                                         <td>Textarea element</td>
                                     </tr>
                                 </tbody>
@@ -131,14 +138,21 @@ import {InputTextarea} from 'primereact/components/inputtextarea/InputTextarea';
                     </TabPanel>
 
                     <TabPanel header="Source">
+                        <a href="https://github.com/primefaces/primereact/tree/master/src/showcase/inputtextarea" className="btn-viewsource" target="_blank" rel="noopener noreferrer">
+                            <span>View on GitHub</span>
+                        </a>
 <CodeHighlight className="language-javascript">
 {`
+import React, {Component} from 'react';
+import {InputTextarea} from 'primereact/inputtextarea';
+
 export class InputTextareaDemo extends Component {
         
     constructor() {
         super();
-        this.state = {value: 'Welcome to Prime!'};
-        this.handleChange = this.handleChange.bind(this);
+        this.state = {
+            value: 'Welcome to PrimeLand!'
+        };
     }
 
     handleChange(e) {
@@ -148,7 +162,7 @@ export class InputTextareaDemo extends Component {
     render() {
         return (
             <div>
-                <div className="content-section">
+                <div className="content-section introduction">
                     <div className="feature-intro">
                         <h1>InputTextarea</h1>
                         <p>Inputtextarea add styling and autoResize functionality to standard textarea element.</p>
@@ -157,14 +171,12 @@ export class InputTextareaDemo extends Component {
 
                 <div className="content-section implementation">
                     <h3>Default</h3>
-                    <InputTextarea value={this.state.value} onChange={this.handleChange} rows={5} cols={30}></InputTextarea>
+                    <InputTextarea value={this.state.value} onChange={(e) => this.setState({value: e.target.value})} rows={5} cols={30}></InputTextarea>
                     <div>{this.state.value}</div>
 
                     <h3>AutoResize</h3>
                     <InputTextarea rows={5} cols={30} autoResize={true}></InputTextarea>
                 </div>
-
-                <InputTextareaDoc />
             </div>
         )
     }

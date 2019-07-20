@@ -1,25 +1,15 @@
 import React, {Component} from 'react';
-import {Link} from 'react-router';
+import {Link} from 'react-router-dom';
 import {Button} from '../../components/button/Button';
 import {TabView,TabPanel} from '../../components/tabview/TabView';
-import {CodeHighlight} from '../../components/codehighlight/CodeHighlight';
+import {CodeHighlight} from '../codehighlight/CodeHighlight';
 
 export class ButtonDemo extends Component {
         
-    constructor() {
-        super();
-        this.state = {count: 0};
-        this.increment = this.increment.bind(this);
-    }
-
-    increment() {
-        this.setState({count: this.state.count + 1});
-    }
-
     render() {
         return (
             <div>
-                <div className="content-section">
+                <div className="content-section introduction">
                     <div className="feature-intro">
                         <h1>Button</h1>
                         <p>Button is an extension to standard input element with icons and theming.</p>
@@ -28,21 +18,35 @@ export class ButtonDemo extends Component {
 
                 <div className="content-section implementation button-demo">
                     <h3 className="first">Basic</h3>
-                    <Button label="Click" onClick={this.increment} />
-                    <Button label="Click" icon="fa-check" onClick={this.increment}/>
-                    <Button label="Click" icon="fa-check" iconPos="right" onClick={this.increment}/>
-                    <Button icon="fa-check" onClick={this.increment}/>
-                    <Button label="Click" disabled="disabled" onClick={this.increment}/>
+                    <Button label="Click" />
+                    <Button label="Click" icon="pi pi-check" />
+                    <Button label="Click" icon="pi pi-check" iconPos="right" />
+                    <Button icon="pi pi-check" />
+                    <Button label="Click" disabled="disabled" />
 
                     <h3>Severities</h3>
-                    <Button label="Primary" onClick={this.increment} />
-                    <Button label="Secondary" onClick={this.increment} className="ui-button-secondary"/>
-                    <Button label="Success" onClick={this.increment} className="ui-button-success"/>
-                    <Button label="Info" onClick={this.increment} className="ui-button-info"/>
-                    <Button label="Warning" onClick={this.increment} className="ui-button-warning"/>
-                    <Button label="Danger" onClick={this.increment} className="ui-button-danger"/>
+                    <Button label="Primary" />
+                    <Button label="Secondary" className="p-button-secondary" />
+                    <Button label="Success" className="p-button-success" />
+                    <Button label="Info" className="p-button-info" />
+                    <Button label="Warning" className="p-button-warning" />
+                    <Button label="Danger" className="p-button-danger" />
 
-                    <p>Number of Clicks: {this.state.count}</p>
+                    <h3>Raised Buttons</h3>
+                    <Button label="Primary" className="p-button-raised" />
+                    <Button label="Secondary" className="p-button-raised p-button-secondary" />
+                    <Button label="Success" className="p-button-raised p-button-success" />
+                    <Button label="Info" className="p-button-raised p-button-info" />
+                    <Button label="Warning" className="p-button-raised p-button-warning" />
+                    <Button label="Danger" className="p-button-raised p-button-danger" />
+
+                    <h3>Rounded Buttons</h3>
+                    <Button label="Primary" className="p-button-rounded" />
+                    <Button label="Secondary" className="p-button-rounded p-button-secondary" />
+                    <Button label="Success" className="p-button-rounded p-button-success" />
+                    <Button label="Info" className="p-button-rounded p-button-info" />
+                    <Button label="Warning" className="p-button-rounded p-button-warning" />
+                    <Button label="Danger" className="p-button-rounded p-button-danger" />
                 </div>
 
                 <ButtonDoc />
@@ -53,22 +57,26 @@ export class ButtonDemo extends Component {
 
 class ButtonDoc extends Component {
 
+    shouldComponentUpdate(){
+        return false;
+    }
+
     render() {
         return (
-            <div className="content-section source">
+            <div className="content-section documentation">
                 <TabView>
                     <TabPanel header="Documentation">
                         <h3>Import</h3>
 <CodeHighlight className="language-javascript">
 {`
-import {Button} from 'primereact/components/button/Button';
+import {Button} from 'primereact/button';
 
 `}
 </CodeHighlight>
 
                         <h3>Getting Started</h3>
                         <p>Button is created using the Button element.</p>    
-<CodeHighlight className="language-markup">
+<CodeHighlight className="language-jsx">
 {`
 <Button />
 
@@ -76,29 +84,30 @@ import {Button} from 'primereact/components/button/Button';
 </CodeHighlight>
 
                         <h3>Label</h3>
-                        <p>Use label property to define the text of the button.</p>    
-<CodeHighlight className="language-markup">
+                        <p>Text of the button is defined using the <i>label</i> property.</p>    
+<CodeHighlight className="language-jsx">
 {`
-<Button label="Save"/>
+<Button label="Save" />
 
 `}
 </CodeHighlight>
 
                         <h3>Icons</h3>
-                        <p>Icon on a button is specified with icon attribute and position is customized using iconPos attribute. Default
-                        icon position is left. To display only an icon, leave label as undefined.</p>
-<CodeHighlight className="language-markup">
+                        <p>Icon on a button is specified with <i>icon</i> property and position is configured using <i>iconPos</i> attribute. Default
+                        icon position is "left" and alternative is "right". To display only an icon, leave label as undefined.</p>
+
+<CodeHighlight className="language-jsx">
 {`
-<Button label="Click" icon="fa-check" />
-<Button label="Click" icon="fa-check" iconPos="right"/>
-<Button icon="fa-check" iconPos="right"/>
+<Button label="Click" icon="pi pi-check" />
+<Button label="Click" icon="pi pi-check" iconPos="right" />
+<Button icon="pi pi-check" iconPos="right" />
 
 `}
 </CodeHighlight>
 
                         <h3>Events</h3>
-                        <p>Events are defined using standard notation.</p>
-<CodeHighlight className="language-markup">
+                        <p>Events are defined with the standard notation.</p>
+<CodeHighlight className="language-jsx">
 {`
 <Button label="Click" onClick={this.handleClick} />
 
@@ -108,28 +117,37 @@ import {Button} from 'primereact/components/button/Button';
 
 
                         <h3>Severity</h3>
-                        <p>Different color options are available to define severity levels.</p>
+                        <p>Different color options are available as severity levels.</p>
                         
                         <ul>
-                            <li>.ui-button-secondary</li>
-                            <li>.ui-button-success</li>
-                            <li>.ui-button-info</li>
-                            <li>.ui-button-warning</li>
-                            <li>.ui-button-danger</li>
+                            <li>.p-button-secondary</li>
+                            <li>.p-button-success</li>
+                            <li>.p-button-info</li>
+                            <li>.p-button-warning</li>
+                            <li>.p-button-danger</li>
                         </ul>
-<CodeHighlight className="language-markup">
+
+<CodeHighlight className="language-jsx">
 {`
 <Button label="Primary" />
-<Button label="Secondary" className="ui-button-secondary"/>
-<Button label="Success" className="ui-button-success"/>
-<Button label="Info" className="ui-button-info"/>
-<Button label="Warning" className="ui-button-warning"/>
-<Button label="Danger" className="ui-button-danger"/>
+<Button label="Secondary" className="p-button-secondary" />
+<Button label="Success" className="p-button-success" />
+<Button label="Info" className="p-button-info" />
+<Button label="Warning" className="p-button-warning" />
+<Button label="Danger" className="p-button-danger" />
 
 `}
 </CodeHighlight>
 
-                        <h3>Attributes</h3>
+                        <h3>Raised and Rounded Buttons</h3>
+                        <p>A button can be raised by having "p-button-raised" style class and similarly borders can be made rounded using "p-button-rounded" class.</p>
+                        <CodeHighlight className="language-jsx">
+{`
+<Button label="Proceed" className="p-button-raised p-button-rounded" />
+
+`}
+</CodeHighlight>
+                        <h3>Properties</h3>
                         <div className="doc-tablewrapper">
                             <table className="doc-table">
                                 <thead>
@@ -159,6 +177,18 @@ import {Button} from 'primereact/components/button/Button';
                                         <td>left</td>
                                         <td>Position of the icon, valid values are "left" and "right".</td>
                                     </tr>
+                                    <tr>
+                                        <td>tooltip</td>
+                                        <td>any</td>
+                                        <td>null</td>
+                                        <td>Content of the tooltip.</td>
+                                    </tr>
+                                    <tr>
+                                        <td>tooltipOptions</td>
+                                        <td>object</td>
+                                        <td>null</td>
+                                        <td>Configuration of the tooltip, refer to the tooltip documentation for more information.</td>
+                                    </tr>
                                 </tbody>
                             </table>
                         </div>
@@ -175,15 +205,15 @@ import {Button} from 'primereact/components/button/Button';
                                 </thead>
                                 <tbody>
                                     <tr>
-                                        <td>ui-button</td>
+                                        <td>p-button</td>
                                         <td>Button element</td>
                                     </tr>
                                     <tr>
-                                        <td>ui-button-icon</td>
+                                        <td>p-button-icon</td>
                                         <td>Icon element</td>
                                     </tr>
                                     <tr>
-                                        <td>ui-button-text</td>
+                                        <td>p-button-text</td>
                                         <td>Label element of the button</td>
                                     </tr>
                                 </tbody>
@@ -195,24 +225,36 @@ import {Button} from 'primereact/components/button/Button';
                     </TabPanel>
 
                     <TabPanel header="Source">
+
+                        <a href="https://github.com/primefaces/primereact/tree/master/src/showcase/button" className="btn-viewsource" target="_blank" rel="noopener noreferrer">
+                            <span>View on GitHub</span>
+                        </a>
+
 <CodeHighlight className="language-javascript">
 {`
+import React, {Component} from 'react';
+import {Button} from 'primereact/button';
+
 export class ButtonDemo extends Component {
         
     constructor() {
         super();
-        this.state = {count: 0};
+        this.state = {
+            count: 0
+        };
         this.increment = this.increment.bind(this);
     }
 
     increment() {
-        this.setState({count: this.state.count + 1});
+        this.setState((prevState, props) => ({
+            count: prevState.count + 1
+        }));
     }
 
     render() {
         return (
             <div>
-                <div className="content-section">
+                <div className="content-section introduction">
                     <div className="feature-intro">
                         <h1>Button</h1>
                         <p>Button is an extension to standard input element with icons and theming.</p>
@@ -221,26 +263,41 @@ export class ButtonDemo extends Component {
 
                 <div className="content-section implementation button-demo">
                     <h3 className="first">Basic</h3>
-                    <Button label="Click" onClick={this.increment} />
-                    <Button label="Click" icon="fa-check" onClick={this.increment}/>
-                    <Button label="Click" icon="fa-check" iconPos="right" onClick={this.increment}/>
-                    <Button icon="fa-check" onClick={this.increment}/>
-                    <Button label="Click" disabled="disabled" onClick={this.increment}/>
+                    <Button label="Click" />
+                    <Button label="Click" icon="pi pi-check" />
+                    <Button label="Click" icon="pi pi-check" iconPos="right" />
+                    <Button icon="pi pi-check" />
+                    <Button label="Click" disabled="disabled" />
 
                     <h3>Severities</h3>
-                    <Button label="Primary" onClick={this.increment} />
-                    <Button label="Secondary" onClick={this.increment} className="ui-button-secondary"/>
-                    <Button label="Success" onClick={this.increment} className="ui-button-success"/>
-                    <Button label="Info" onClick={this.increment} className="ui-button-info"/>
-                    <Button label="Warning" onClick={this.increment} className="ui-button-warning"/>
-                    <Button label="Danger" onClick={this.increment} className="ui-button-danger"/>
+                    <Button label="Primary" />
+                    <Button label="Secondary" className="p-button-secondary" />
+                    <Button label="Success" className="p-button-success" />
+                    <Button label="Info" className="p-button-info" />
+                    <Button label="Warning" className="p-button-warning" />
+                    <Button label="Danger" className="p-button-danger" />
 
-                    <p>Number of Clicks: {this.state.count}</p>
+                    <h3>Raised Buttons</h3>
+                    <Button label="Primary" className="p-button-raised" />
+                    <Button label="Secondary" className="p-button-raised p-button-secondary" />
+                    <Button label="Success" className="p-button-raised p-button-success" />
+                    <Button label="Info" className="p-button-raised p-button-info" />
+                    <Button label="Warning" className="p-button-raised p-button-warning" />
+                    <Button label="Danger" className="p-button-raised p-button-danger" />
+
+                    <h3>Rounded Buttons</h3>
+                    <Button label="Primary" className="p-button-rounded" />
+                    <Button label="Secondary" className="p-button-rounded p-button-secondary" />
+                    <Button label="Success" className="p-button-rounded p-button-success" />
+                    <Button label="Info" className="p-button-rounded p-button-info" />
+                    <Button label="Warning" className="p-button-rounded p-button-warning" />
+                    <Button label="Danger" className="p-button-rounded p-button-danger" />
                 </div>
             </div>
         )
     }
 }
+
 `}
 </CodeHighlight>
                     </TabPanel>

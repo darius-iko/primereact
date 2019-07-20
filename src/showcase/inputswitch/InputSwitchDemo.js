@@ -1,29 +1,23 @@
 import React, {Component} from 'react';
+import {Link} from 'react-router-dom';
 import {InputSwitch} from '../../components/inputswitch/InputSwitch';
 import {TabView,TabPanel} from '../../components/tabview/TabView';
-import {CodeHighlight} from '../../components/codehighlight/CodeHighlight';
+import {CodeHighlight} from '../codehighlight/CodeHighlight';
 
 export class InputSwitchDemo extends Component {
 
     constructor() {
         super();
-        this.state = {checked2:true};
-        this.onChangeBasic = this.onChangeBasic.bind(this);
-        this.onChangeCustom = this.onChangeCustom.bind(this);
-    }
-
-    onChangeBasic(e) {
-        this.setState({checked1:e.value});
-    }
-
-    onChangeCustom(e) {
-        this.setState({checked2:e.value});
+        this.state = {
+            checked1: false,
+            checked2: true
+        };
     }
 
     render() {
         return (
             <div>
-                <div className="content-section">
+                <div className="content-section introduction">
                     <div className="feature-intro">
                         <h1>InputSwitch</h1>
                         <p>InputSwitch is used to select a boolean value.</p>
@@ -32,12 +26,10 @@ export class InputSwitchDemo extends Component {
 
                 <div className="content-section implementation">
                     <h3>Basic</h3>
-                    <InputSwitch checked={this.state.checked1} onChange={this.onChangeBasic}/>
-                    <p>Selected Value: {this.state.checked1 ? 'true' : 'false'}</p>
+                    <InputSwitch checked={this.state.checked1} onChange={(e) => this.setState({checked1: e.value})} />
 
-                    <h3>Labels</h3>
-                    <InputSwitch onLabel="Yes" offLabel="No" checked={this.state.checked2} onChange={this.onChangeCustom}/>
-                    <p>Selected Value: {this.state.checked2 ? 'true' : 'false'}</p>
+                    <h3>Default Value</h3>
+                    <InputSwitch checked={this.state.checked2} onChange={(e) => this.setState({checked2: e.value})} />
                 </div>
 
                 <InputSwitchDoc></InputSwitchDoc>
@@ -48,54 +40,43 @@ export class InputSwitchDemo extends Component {
 
 class InputSwitchDoc extends Component {
 
+    shouldComponentUpdate(){
+        return false;
+    }
+
     render() {
         return (
-            <div className="content-section source">
+            <div className="content-section documentation">
     <TabView effect="fade">
         <TabPanel header="Documentation">
             <h3>Import</h3>
 <CodeHighlight className="language-javascript">
 {`
-import {InputSwitch} from 'primereact/components/inputswitch/InputSwitch';
+import {InputSwitch} from 'primereact/inputswitch';
 
 `}
 </CodeHighlight>
 
             <h3>Getting Started</h3>
-            <p>InputSwitch is used as a controlled input with checked and onChange properties.</p>
+            <p>InputSwitch is used as a controlled input with <i>checked</i> and <i>onChange</i> properties.</p>
                     
-<CodeHighlight className="language-markup">
+<CodeHighlight className="language-jsx">
 {`
-<InputSwitch checked={this.state.checked1} onChange={this.onChangeBasic}/>
-
-`}
-</CodeHighlight>
-
-<CodeHighlight className="language-javascript">
-{`
-constructor() {
-    super();
-    this.state = {checked2:true};
-    this.onChangeBasic = this.onChangeBasic.bind(this);
-}
-
-onChangeBasic(e) {
-    this.setState({checked1:e.value});
-}
+<InputSwitch checked={this.state.value} onChange={(e) => this.setState({value: e.value})} />
 
 `}
 </CodeHighlight>
 
             <h3>Customization</h3>
-            <p>Labels can be customized using onLabel and offLabel properties.</p>
-<CodeHighlight className="language-markup">
+            <p>Labels can be customized with <i>onLabel</i> and <i>offLabel</i> properties.</p>
+<CodeHighlight className="language-jsx">
 {`
-<InputSwitch onLabel="Yes" offLabel="No" checked={this.state.checked2} onChange={this.onChangeCustom}/>
+<InputSwitch onLabel="Yes" offLabel="No" checked={this.state.value} onChange={(e) => this.setState({value: e.value})} />
 
 `}
 </CodeHighlight>
 
-            <h3>Attributes</h3>
+            <h3>Properties</h3>
             <div className="doc-tablewrapper">
                 <table className="doc-table">
                     <thead>
@@ -107,17 +88,11 @@ onChangeBasic(e) {
                         </tr>
                     </thead>
                     <tbody>
-                         <tr>
-                            <td>onLabel</td>
-                            <td>string</td>
-                            <td>On</td>
-                            <td>Label for the on state.</td>
-                        </tr>
                         <tr>
-                            <td>offLabel</td>
+                            <td>id</td>
                             <td>string</td>
-                            <td>off</td>
-                            <td>Label for the off state.</td>
+                            <td>null</td>
+                            <td>Unique identifier of the element.</td>
                         </tr>
                         <tr>
                             <td>style</td>
@@ -131,18 +106,42 @@ onChangeBasic(e) {
                             <td>null</td>
                             <td>Style class of the element.</td>
                         </tr>
-                         <tr>
-                           <td>tabindex</td>
-                           <td>number</td>
-                           <td>null</td>
-                           <td>Index of the element in tabbing order.</td>
-                         </tr>
-                         <tr>
+                        <tr>
+                            <td>inputId</td>
+                            <td>string</td>
+                            <td>null</td>
+                            <td>Identifier of the input element.</td>
+                        </tr>
+                        <tr>
+                            <td>name</td>
+                            <td>string</td>
+                            <td>null</td>
+                            <td>Name of the input element.</td>
+                        </tr>
+                        <tr>
                              <td>checked</td>
                              <td>boolean</td>
                              <td>false</td>
                              <td>Specifies whether a inputswitch should be checked or not.</td>
-                         </tr>
+                        </tr>
+                        <tr>
+                            <td>disabled</td>
+                            <td>boolean</td>
+                            <td>false</td>
+                            <td>When present, it specifies that the component should be disabled.</td>
+                        </tr>
+                        <tr>
+                            <td>tooltip</td>
+                            <td>any</td>
+                            <td>null</td>
+                            <td>Content of the tooltip.</td>
+                        </tr>
+                        <tr>
+                            <td>tooltipOptions</td>
+                            <td>object</td>
+                            <td>null</td>
+                            <td>Configuration of the tooltip, refer to the tooltip documentation for more information.</td>
+                        </tr>
                     </tbody>
                 </table>
             </div>
@@ -160,9 +159,46 @@ onChangeBasic(e) {
                     <tbody>
                         <tr>
                             <td>onChange</td>
-                            <td>event.originalEvent: browser event <br />
-                                event.checked: checked state as a boolean.</td>
-                            <td>Callback to invoke on state change.</td>
+                            <td>event.originalEvent: Browser event <br />
+                                event.value: Checked state as a boolean.</td>
+                            <td>Callback to invoke on value change.</td>
+                        </tr>
+                        <tr>
+                            <td>onFocus</td>
+                            <td>event: Browser event.</td>
+                            <td>Callback to invoke when the element receives focus.</td>
+                        </tr>
+                        <tr>
+                            <td>onBlur</td>
+                            <td>event: Browser event.</td>
+                            <td>Callback to invoke when the element loses focus.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <h3>Styling</h3>
+            <p>Following is the list of structural style classes, for theming classes visit <Link to="/theming"> theming</Link> page.</p>
+            <div className="doc-tablewrapper">
+                <table className="doc-table">
+                    <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Element</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>p-inputswitch</td>
+                            <td>Container element.</td>
+                        </tr>
+                        <tr>
+                            <td>p-inputswitch-checked</td>
+                            <td>Container element in active state.</td>
+                        </tr>
+                        <tr>
+                            <td>p-inputswitch-slider</td>
+                            <td>Slider element behind the handle.</td>
                         </tr>
                     </tbody>
                 </table>
@@ -173,29 +209,28 @@ onChangeBasic(e) {
         </TabPanel>
 
         <TabPanel header="Source">
+            <a href="https://github.com/primefaces/primereact/tree/master/src/showcase/inputswitch" className="btn-viewsource" target="_blank" rel="noopener noreferrer">
+                <span>View on GitHub</span>
+            </a>
 <CodeHighlight className="language-javascript">
 {`
+import React, {Component} from 'react';
+import {InputSwitch} from 'primereact/inputswitch';
+
 export class InputSwitchDemo extends Component {
 
     constructor() {
         super();
-        this.state = {checked2:true};
-        this.onChangeBasic = this.onChangeBasic.bind(this);
-        this.onChangeCustom = this.onChangeCustom.bind(this);
-    }
-
-    onChangeBasic(e) {
-        this.setState({checked1:e.value});
-    }
-
-    onChangeCustom(e) {
-        this.setState({checked2:e.value});
+        this.state = {
+            checked1: false,
+            checked2: true
+        };
     }
 
     render() {
         return (
             <div>
-                <div className="content-section">
+                <div className="content-section introduction">
                     <div className="feature-intro">
                         <h1>InputSwitch</h1>
                         <p>InputSwitch is used to select a boolean value.</p>
@@ -204,15 +239,11 @@ export class InputSwitchDemo extends Component {
 
                 <div className="content-section implementation">
                     <h3>Basic</h3>
-                    <InputSwitch checked={this.state.checked1} onChange={this.onChangeBasic}/>
-                    <p>Selected Value: {this.state.checked1 ? 'true' : 'false'}</p>
+                    <InputSwitch checked={this.state.checked1} onChange={(e) => this.setState({checked1: e.value})} />
 
-                    <h3>Labels</h3>
-                    <InputSwitch onLabel="Yes" offLabel="No" checked={this.state.checked2} onChange={this.onChangeCustom}/>
-                    <p>Selected Value: {this.state.checked2 ? 'true' : 'false'}</p>
+                    <h3>Default Value</h3>
+                    <InputSwitch checked={this.state.checked2} onChange={(e) => this.setState({checked2: e.value})}/>
                 </div>
-
-                <InputSwitchDoc></InputSwitchDoc>
             </div>
         );
     }

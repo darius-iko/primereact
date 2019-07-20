@@ -1,24 +1,24 @@
-import React, { Component } from 'react';
-import { Captcha } from '../../components/captcha/Captcha';
-import { Growl } from '../../components/growl/Growl';
-import { TabView, TabPanel } from '../../components/tabview/TabView';
-import { CodeHighlight } from '../../components/codehighlight/CodeHighlight';
+import React, {Component} from 'react';
+import {Captcha} from '../../components/captcha/Captcha';
+import {Growl} from '../../components/growl/Growl';
+import {TabView, TabPanel} from '../../components/tabview/TabView';
+import {CodeHighlight} from '../codehighlight/CodeHighlight';
 
 export class CaptchaDemo extends Component {
 
     constructor() {
         super();
-        this.state = { message: null };
+        this.showResponse = this.showResponse.bind(this);
     }
 
     showResponse() {
-        this.setState({ message: [{ severity: 'info', summary: 'Success', detail: 'User Responsed' }] });
+        this.growl.show({severity: 'info', summary: 'Success', detail: 'User Responded'});
     }
 
     render() {
         return (
             <div>
-                <div className="content-section">
+                <div className="content-section introduction">
                     <div className="feature-intro">
                         <h1>Captcha</h1>
                         <p>Captcha is a form validation component based on Recaptcha.</p>
@@ -26,9 +26,9 @@ export class CaptchaDemo extends Component {
                 </div>
 
                 <div className="content-section implementation button-demo">
-                    <Growl value={this.state.message}></Growl>
+                    <Growl ref={(el) => this.growl = el}></Growl>
 
-                    <Captcha siteKey="6Lf2XQkTAAAAANcvOwYqPxWL4iZDksFqHpS39GDA" onResponse={this.showResponse.bind(this)}></Captcha>
+                    <Captcha siteKey="6Lf2XQkTAAAAANcvOwYqPxWL4iZDksFqHpS39GDA" onResponse={this.showResponse} />
                 </div>
 
                 <CaptchaDoc />
@@ -39,32 +39,28 @@ export class CaptchaDemo extends Component {
 
 class CaptchaDoc extends Component {
 
+    shouldComponentUpdate(){
+        return false;
+    }
+
     render() {
         return (
-            <div className="content-section source">
+            <div className="content-section documentation">
                 <TabView>
                     <TabPanel header="Documentation">
                         <h3>Import</h3>
 <CodeHighlight className="language-javascript">
 {`
-import {Captcha} from 'primereact/components/captcha/Captcha';
+import {Captcha} from 'primereact/captcha';
 
 `}
 </CodeHighlight>
 
                         <h3>Getting Started</h3>
                         <p>Captcha is used with a siteKey and a callback to verify the response.</p>
-<CodeHighlight className="language-markup">
+<CodeHighlight className="language-jsx">
 {`
-<Captcha siteKey="YOUR_SITE_KEY" onResponse={this.showResponse.bind(this)}></Captcha>
-
-`}
-</CodeHighlight>
-
-                        <p>In addition include the captcha widget resource to your page.</p>
-<CodeHighlight className="language-markup">
-{`
-<script src="https://www.google.com/recaptcha/api.js?render=explicit" async defer></script>
+<Captcha siteKey="YOUR_SITE_KEY" onResponse={this.showResponse}></Captcha>
 
 `}
 </CodeHighlight>
@@ -72,7 +68,7 @@ import {Captcha} from 'primereact/components/captcha/Captcha';
                         <h3>Verification</h3>
                         <p>In order to ensure if a response token is valid, verification against recaptcha api needs to be done at backend. <a href="https://developers.google.com/recaptcha/docs/verify">Read more</a> at
                         official documentation.</p>
-<CodeHighlight className="language-markup">
+<CodeHighlight className="language-javascript">
 {`
 showResponse(response) {
     //call to a backend to verify against recaptcha with private key
@@ -81,7 +77,15 @@ showResponse(response) {
 `}
 </CodeHighlight>
 
-                        <h3>Attributes</h3>
+                        <p>In addition, include the captcha widget resource to your page.</p>
+<CodeHighlight className="language-jsx">
+{`
+<script src="https://www.google.com/recaptcha/api.js?render=explicit" async defer></script>
+
+`}
+</CodeHighlight>
+
+                        <h3>Properties</h3>
                         <div className="doc-tablewrapper">
                             <table className="doc-table">
                                 <thead>
@@ -94,7 +98,13 @@ showResponse(response) {
                                 </thead>
                                 <tbody>
                                     <tr>
-                                        <td>sitekey</td>
+                                        <td>id</td>
+                                        <td>string</td>
+                                        <td>null</td>
+                                        <td>Unique identifier of the element.</td>
+                                    </tr>
+                                    <tr>
+                                        <td>siteKey</td>
                                         <td>string</td>
                                         <td>null</td>
                                         <td>Public sitekey.</td>
@@ -118,13 +128,10 @@ showResponse(response) {
                                         <td>The size of the widget.</td>
                                     </tr>
                                     <tr>
-                                        <td>tabindex</td>
+                                        <td>tabIndex</td>
                                         <td>number</td>
                                         <td>0</td>
-                                        <td>The tabindex of the widget and challenge.
-                                If other elements in your page use tabindex,
-                                it should be set to make user navigation easier.
-                            </td>
+                                        <td>The tabindex of the widget and challenge.</td>
                                     </tr>
                                     <tr>
                                         <td>language</td>
@@ -186,31 +193,37 @@ showResponse(response) {
                             </table>
                         </div>
 
-                        <h3>Official Documentation</h3>
-                        <a href="https://developers.google.com/recaptcha/docs/display">Here</a>
-
                         <h3>Dependencies</h3>
                         <p>Google Recaptcha V2</p>
                     </TabPanel>
 
                     <TabPanel header="Source">
+                        <a href="https://github.com/primefaces/primereact/tree/master/src/showcase/captcha" className="btn-viewsource" target="_blank" rel="noopener noreferrer">
+                            <span>View on GitHub</span>
+                        </a>
                         <CodeHighlight className="language-javascript">
                             {`
+import React, {Component} from 'react';
+import {Captcha} from '../../components/captcha/Captcha';
+import {Growl} from '../../components/growl/Growl';
+import {TabView, TabPanel} from '../../components/tabview/TabView';
+import {CodeHighlight} from '../codehighlight/CodeHighlight';
+
 export class CaptchaDemo extends Component {
 
     constructor() {
         super();
-        this.state = { message: null };
+        this.showResponse = this.showResponse.bind(this);
     }
 
     showResponse() {
-        this.setState({ message: [{ severity: 'info', summary: 'Success', detail: 'User Responsed' }] });
+        this.growl.show({severity: 'info', summary: 'Success', detail: 'User Responded'});
     }
 
     render() {
         return (
             <div>
-                <div className="content-section">
+                <div className="content-section introduction">
                     <div className="feature-intro">
                         <h1>Captcha</h1>
                         <p>Captcha is a form validation component based on Recaptcha.</p>
@@ -218,16 +231,15 @@ export class CaptchaDemo extends Component {
                 </div>
 
                 <div className="content-section implementation button-demo">
-                    <Growl value={this.state.message}></Growl>
+                    <Growl ref={(el) => this.growl = el}></Growl>
 
-                    <Captcha siteKey="6LcUcyEUAAAAAGfRdVWWuX9bh8roD-lEqx2onu6g" onResponse={this.showResponse.bind(this)}></Captcha>
+                    <Captcha siteKey="YOUR_SITE_KEY" onResponse={this.showResponse} />
                 </div>
-
-                <CaptchaDoc />
             </div>
         )
     }
 }
+
 `}
                         </CodeHighlight>
                     </TabPanel>

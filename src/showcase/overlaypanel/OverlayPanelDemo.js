@@ -1,25 +1,16 @@
 import React, {Component} from 'react';
-import {Link} from 'react-router';
+import {Link} from 'react-router-dom';
 import {OverlayPanel} from '../../components/overlaypanel/OverlayPanel';
 import {Button} from '../../components/button/Button';
 import {TabView,TabPanel} from '../../components/tabview/TabView';
-import {CodeHighlight} from '../../components/codehighlight/CodeHighlight';
+import {CodeHighlight} from '../codehighlight/CodeHighlight';
 
 export class OverlayPanelDemo extends Component {
         
-    constructor() {
-        super();
-        this.onClick = this.onClick.bind(this);
-    }
-
-    onClick(event) {
-        this.op.toggle(event);
-    }
-
     render() {
         return (
             <div>
-                <div className="content-section">
+                <div className="content-section introduction">
                     <div className="feature-intro">
                         <h1>OverlayPanel</h1>
                         <p>OverlayPanel is a container component that can overlay other components on page.</p>
@@ -27,14 +18,13 @@ export class OverlayPanelDemo extends Component {
                 </div>
 
                 <div className="content-section implementation">
-                    <h3>Basic</h3>
-                    <p>Click the button to show the panel.</p>
-                    <Button type="button" label="Basic" onClick={this.onClick} />
+                    <Button type="button" label="Toggle" onClick={(e) => this.op.toggle(e)} />
 
-                    <OverlayPanel ref={(el) => {this.op = el;}}>
+                    <OverlayPanel ref={(el) => this.op = el}>
                         <img src="showcase/resources/demo/images/galleria/galleria1.jpg" alt="Galleria 1" />
                     </OverlayPanel>
                 </div>
+                
                 <OverlayPanelDoc></OverlayPanelDoc>
             </div>
         )
@@ -42,42 +32,33 @@ export class OverlayPanelDemo extends Component {
 }
 
 export class OverlayPanelDoc extends Component {
+
+    shouldComponentUpdate(){
+        return false;
+    }
     
     render() {
         return (
-            <div className="content-section source">
+            <div className="content-section documentation">
                 <TabView>
                     <TabPanel header="Documentation">
                         <h3>Import</h3>
 <CodeHighlight className="language-javascript">
 {`
-import {OverlayPanel} from 'primereact/components/overlaypanel/OverlayPanel';
+import {OverlayPanel} from 'primereact/overlaypanel';
 
 `}
 </CodeHighlight>
 
             <h3>Getting Started</h3>
-            <p>OverlayPanel is defined using OverlayPanel element and accessed via its reference.</p>
-<CodeHighlight className="language-markup">
+            <p>OverlayPanel is accessed via its reference where visibility is controlled using toggle, show and hide methods.</p>
+<CodeHighlight className="language-jsx">
 {`
-<Button type="button" label="Basic" onClick={this.onClick} />
+<Button type="button" label="Basic" onClick={(e) => this.op.toggle(e)} />
 
-<OverlayPanel ref={(el) => {this.op = el;}}>
+<OverlayPanel ref={(el) => this.op = el}>
     <img src="showcase/resources/demo/images/galleria/galleria1.jpg" alt="Galleria 1" />
 </OverlayPanel>
-
-`}
-</CodeHighlight>
-<CodeHighlight className="language-javascript">
-{`
-constructor() {
-    super();
-    this.onClick = this.onClick.bind(this);
-}
-
-onClick(event) {
-    this.op.toggle(event);
-}
 
 `}
 </CodeHighlight>
@@ -86,7 +67,7 @@ onClick(event) {
             <p>Clicking outside the overlay hides the panel, setting dismissable to false disables this behavior.
                Additionally enablign showCloseIcon property displays a close icon at the top right corner to close the panel.</p>
                
-<CodeHighlight className="language-markup">
+<CodeHighlight className="language-jsx">
 {`
 <OverlayPanel ref={(el) => {this.op = el;}} showCloseIcon={true} dismissable={true}>
     <img src="showcase/resources/demo/images/galleria/galleria1.jpg" alt="Galleria 1" />
@@ -95,7 +76,7 @@ onClick(event) {
 `}
 </CodeHighlight>
 
-            <h3>Attributes</h3>
+            <h3>Properties</h3>
             <div className="doc-tablewrapper">
                 <table className="doc-table">
                     <thead>
@@ -107,6 +88,12 @@ onClick(event) {
                     </tr>
                     </thead>
                     <tbody>
+                        <tr>
+                            <td>id</td>
+                            <td>string</td>
+                            <td>null</td>
+                            <td>Unique identifier of the element.</td>
+                        </tr>
                         <tr>
                             <td>dismissable</td>
                             <td>boolean</td>
@@ -120,12 +107,6 @@ onClick(event) {
                             <td>When enabled, displays a close icon at top right corner.</td>
                         </tr>
                         <tr>
-                            <td>appendTo</td>
-                            <td>any</td>
-                            <td>null</td>
-                            <td>Target element to attach the panel, valid values are "body" or a local template variable of another element.</td>
-                        </tr>
-                        <tr>
                             <td>style</td>
                             <td>string</td>
                             <td>null</td>
@@ -136,6 +117,63 @@ onClick(event) {
                             <td>string</td>
                             <td>null</td>
                             <td>Style class of the element.</td>
+                        </tr>
+                        <tr>
+                            <td>appendTo</td>
+                            <td>DOM element</td>
+                            <td>null</td>
+                            <td>DOM element instance where the dialog should be mounted.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <h3>Events</h3>
+            <div className="doc-tablewrapper">
+                <table className="doc-table">
+                    <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Parameters</th>
+                        <th>Description</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>onHide</td>
+                            <td>-</td>
+                            <td>Callback to invoke when overlay gets hidden.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <h3>Methods</h3>
+            <div className="doc-tablewrapper">
+                <table className="doc-table">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Parameters</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>toggle</td>
+                            <td>event: Browser event</td>
+                            <td>Toggles the visiblity of the overlay.</td>
+                        </tr>
+                        <tr>
+                            <td>show</td>
+                            <td>event: Browser event <br />
+                                target: Optional target if event.target should not be used</td>
+                            <td>Shows the overlay.</td>
+                        </tr>
+                        <tr>
+                            <td>hide</td>
+                            <td>-</td>
+                            <td>Hides the overlay.</td>
                         </tr>
                     </tbody>
                 </table>
@@ -153,15 +191,15 @@ onClick(event) {
                     </thead>
                     <tbody>
                         <tr>
-                            <td>ui-overlaypanel</td>
+                            <td>p-overlaypanel</td>
                             <td>Container element.</td>
                         </tr>
                         <tr>
-                            <td>ui-overlaypanel-content</td>
+                            <td>p-overlaypanel-content</td>
                             <td>Content of the panel.</td>
                         </tr>
                         <tr>
-                            <td>ui-overlaypanel-close</td>
+                            <td>p-overlaypanel-close</td>
                             <td>Close icon.</td>
                         </tr>
                     </tbody>
@@ -174,23 +212,20 @@ onClick(event) {
             </TabPanel>
 
             <TabPanel header="Source">
+                <a href="https://github.com/primefaces/primereact/tree/master/src/showcase/overlaypanel" className="btn-viewsource" target="_blank" rel="noopener noreferrer">
+                    <span>View on GitHub</span>
+                </a>
 <CodeHighlight className="language-javascript">
 {`
+import React, {Component} from 'react';
+import {OverlayPanel} from 'primereact/overlaypanel';
+
 export class OverlayPanelDemo extends Component {
         
-    constructor() {
-        super();
-        this.onClick = this.onClick.bind(this);
-    }
-
-    onClick(event) {
-        this.op.toggle(event);
-    }
-
     render() {
         return (
             <div>
-                <div className="content-section">
+                <div className="content-section introduction">
                     <div className="feature-intro">
                         <h1>OverlayPanel</h1>
                         <p>OverlayPanel is a container component that can overlay other components on page.</p>
@@ -198,15 +233,12 @@ export class OverlayPanelDemo extends Component {
                 </div>
 
                 <div className="content-section implementation">
-                    <h3>Basic</h3>
-                    <p>Click the button to show the panel.</p>
-                    <Button type="button" label="Basic" onClick={this.onClick} />
+                    <Button type="button" label="Toggle" onClick={(e) => this.op.toggle(e)} />
 
-                    <OverlayPanel ref={(el) => {this.op = el;}}>
+                    <OverlayPanel ref={(el) => this.op = el}>
                         <img src="showcase/resources/demo/images/galleria/galleria1.jpg" alt="Galleria 1" />
                     </OverlayPanel>
                 </div>
-                <OverlayPanelDoc></OverlayPanelDoc>
             </div>
         )
     }

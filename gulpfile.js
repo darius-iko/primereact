@@ -8,45 +8,37 @@ var gulp = require('gulp'),
     flatten = require('gulp-flatten');
     
 gulp.task('build-css', function() {
-	return gulp.src([
-        'src/components/common/Common.css',
-		'src/components/**/*.css'
-    ])
-	.pipe(concat('primeng.css'))
-	.pipe(gulp.dest('public/resources'));
-});
-
-gulp.task('build-css-prod', function() {
     return gulp.src([
         'src/components/common/Common.css',
 		'src/components/**/*.css'
     ])
-	.pipe(concat('primeng.css'))
-	.pipe(gulp.dest('public/resources'))
+	.pipe(concat('primereact.css'))
+	.pipe(gulp.dest('resources'))
     .pipe(uglifycss({"uglyComments": true}))
-    .pipe(rename('primeng.min.css'))
-	.pipe(gulp.dest('public/resources'));
+    .pipe(rename('primereact.min.css'))
+	.pipe(gulp.dest('resources'));
 });
+
+gulp.task('build-themes', function() {
+    return gulp.src([
+        'public/resources/themes/**/*'
+    ])
+    //.pipe(uglifycss({"uglyComments": true}))
+    .pipe(gulp.dest('resources/themes'));
+})
 
 gulp.task('images', function() {
     return gulp.src(['src/components/**/images/*.png', 'src/components/**/images/*.gif'])
         .pipe(flatten())
-        .pipe(gulp.dest('public/resources/images'));
+        .pipe(gulp.dest('resources/images'));
 });
 
-//Cleaning previous gulp tasks from project
-gulp.task('clean', function() {
-    return del(['public/resources/images/','public/resources/primeng.css','public/resources/primeng.min.css']);
+gulp.task('build-exports', function() {
+    return gulp.src(['exports/*.js','exports/*.d.ts'])
+        .pipe(gulp.dest('./'));
 });
 
 //Building project with run sequence
-gulp.task('build', ['clean','build-css-prod','images']);
-
-gulp.task('prepublish', ['clean','build'], function() {
-    gulp.src([
-        'public/resources/**/*',
-    ])
-	.pipe(gulp.dest('resources'));
-});
+gulp.task('build-resources', ['build-css','images', 'build-themes']);
 
         

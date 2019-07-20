@@ -3,85 +3,158 @@ import PropTypes from 'prop-types';
 import ReactDOM from 'react-dom';
 import {InputText} from '../inputtext/InputText';
 import classNames from 'classnames';
+import Tooltip from "../tooltip/Tooltip";
+import DomHandler from '../utils/DomHandler';
 
 export class Spinner extends Component {
 
     static defaultProps = {
+        id: null,
+        value: null,
+        name: null,
         step: 1,
         min: null,
         max: null,
+        formatInput: false,
+        decimalSeparator: null,
+        thousandSeparator: null,
         disabled: false,
+        required: false,
+        pattern: null,
+        placeholder: null,
         readonly: false,
         maxlength: null,
         size: null,
-        decimalSeparator: '.',
-        thousandSeparator: ',',
         style: null,
-        className: null
+        className: null,
+        inputId: null,
+        inputStyle: null,
+        inputClassName: null,
+        tooltip: null,
+        tooltipOptions: null,
+        onChange: null,
+        onBlur: null
     }
 
-    static propsTypes = {
+    static propTypes = {
+        id: PropTypes.string,
+        value: PropTypes.any,
+        name: PropTypes.string,
         step: PropTypes.number,
         min: PropTypes.number,
         max: PropTypes.number,
+        formatInput: PropTypes.bool,
+        decimalSeparator: PropTypes.string,
+        thousandSeparator: PropTypes.string,
         disabled: PropTypes.bool,
+        required: PropTypes.bool,
+        pattern: PropTypes.string,
+        placeholder: PropTypes.string,
         readonly: PropTypes.bool,
         maxlength: PropTypes.number,
         size: PropTypes.number,
-        decimalSeparator: PropTypes.string,
-        thousandSeparator: PropTypes.string,
-        style: PropTypes.string,
-        className: PropTypes.string
+        style: PropTypes.object,
+        className: PropTypes.string,
+        inputId: PropTypes.string,
+        inputStyle: PropTypes.object,
+        inputClassName: PropTypes.string,
+        tooltip: PropTypes.string,
+        tooltipOptions: PropTypes.object,
+        onChange: PropTypes.func,
+        onBlur: PropTypes.func
     }
 
     constructor(props) {
         super(props);
 
-        if (Math.floor(this.props.step) === 0) {
+        if(this.props.value && this.props.value.toString().indexOf('.') > 0) {
+            this.precision = this.props.value.toString().split(/[.]/)[1].length;
+        }
+        else if(this.props.step % 1 !== 0) {
+            // If step is not an integer then extract the length of the decimal part
             this.precision = this.props.step.toString().split(/[,]|[.]/)[1].length;
         }
+
+        if (this.props.formatInput) {
+            this.localeDecimalSeparator = (1.1).toLocaleString().substring(1, 2);
+            this.localeThousandSeparator = (1000).toLocaleString().substring(1, 2);
+            this.thousandRegExp = new RegExp(`[${this.props.thousandSeparator || this.localeThousandSeparator}]`, 'gim');
+
+            if (this.props.decimalSeparator && this.props.thousandSeparator && this.props.decimalSeparator === this.props.thousandSeparator) {
+                console.warn("thousandSeparator and decimalSeparator cannot have the same value.");
+            }
+        }
+
+        this.formatValue(this.props.value);
+
+        this.onInputKeyDown = this.onInputKeyDown.bind(this);
+        this.onInputChange = this.onInputChange.bind(this);
+        this.onInputBlur = this.onInputBlur.bind(this);
+        this.onInputFocus = this.onInputFocus.bind(this);
+
+        this.onUpButtonMouseLeave = this.onUpButtonMouseLeave.bind(this);
+        this.onUpButtonMouseDown = this.onUpButtonMouseDown.bind(this);
+        this.onUpButtonMouseUp = this.onUpButtonMouseUp.bind(this);
+        this.onUpButtonKeyDown = this.onUpButtonKeyDown.bind(this);
+        this.onUpButtonKeyUp = this.onUpButtonKeyUp.bind(this);
+
+        this.onDownButtonMouseLeave = this.onDownButtonMouseLeave.bind(this);
+        this.onDownButtonMouseDown = this.onDownButtonMouseDown.bind(this);
+        this.onDownButtonMouseUp = this.onDownButtonMouseUp.bind(this);
+        this.onDownButtonKeyDown = this.onDownButtonKeyDown.bind(this);
+        this.onDownButtonKeyUp = this.onDownButtonKeyUp.bind(this);
     }
 
-    repeat(interval, dir) {
+    repeat(event, interval, dir) {
         let i = interval || 500;
 
         this.clearTimer();
         this.timer = setTimeout(() => {
-            this.repeat(40, dir);
+            this.repeat(event, 40, dir);
         }, i);
 
-        this.spin(dir);
+        this.spin(event, dir);
     }
 
-    spin(dir) {
+    spin(event, dir) {
         let step = this.props.step * dir;
-        let currentValue = this.value || 0;
+        let currentValue;
+        let newValue;
+
+        if (this.props.value)
+            currentValue = (typeof this.props.value === 'string') ? this.parseValue(this.props.value) : this.props.value;
+        else
+            currentValue = 0;
 
         if (this.precision)
-            this.value = parseFloat(this.toFixed(currentValue + step, this.precision));
+            newValue = parseFloat(this.toFixed(currentValue + step, this.precision));
         else
-            this.value = currentValue + step;
+            newValue = currentValue + step;
 
-        if (this.props.maxlength !== null && this.value.toString().length > this.props.maxlength) {
-            this.value = currentValue;
+        if (this.props.maxlength !== null && this.props.value.toString().length > this.props.maxlength) {
+            newValue = currentValue;
         }
 
-        if (this.props.min !== null && this.value < this.props.min) {
-            this.value = this.props.min;
+        if (this.props.min !== null && newValue < this.props.min) {
+            newValue = this.props.min;
         }
 
-        if (this.props.max !== null && this.value > this.props.max) {
-            this.value = this.props.max;
+        if (this.props.max !== null && newValue > this.props.max) {
+            newValue= this.props.max;
         }
-
-        this.formatValue();
-
-        this.inputEl.value = this.valueAsString;
+        
         if (this.props.onChange) {
             this.props.onChange({
                 originalEvent: event,
-                value: this.value
-            })
+                value: newValue,
+                stopPropagation : () =>{},
+                preventDefault : () =>{},
+                target: {
+                    name: this.props.name,
+                    id: this.props.id,
+                    value: newValue
+                }
+            });
         }
     }
 
@@ -90,98 +163,96 @@ export class Spinner extends Component {
         return String(Math.round(value * power) / power);
     }
 
-    onUpButtonMousedown(event, input) {
+    onUpButtonMouseDown(event) {
         if (!this.props.disabled) {
-            input.focus();
-            this.repeat(null, 1);
-            this.updateFilledState();
+            this.inputEl.focus();
+            this.repeat(event, null, 1);
             event.preventDefault();
         }
     }
 
-    onUpButtonMouseup(event) {
+    onUpButtonMouseUp(event) {
         if (!this.props.disabled) {
             this.clearTimer();
         }
     }
 
-    onUpButtonMouseleave(event) {
+    onUpButtonMouseLeave(event) {
         if (!this.props.disabled) {
             this.clearTimer();
         }
     }
 
-    onDownButtonMousedown(event, input) {
+    onUpButtonKeyUp(event) {
         if (!this.props.disabled) {
-            input.focus();
-            this.repeat(null, -1);
-            this.updateFilledState();
+            this.clearTimer();
+        }
+    }
+
+    onUpButtonKeyDown(event) {
+        if (event.keyCode === 32 || event.keyCode === 13) {
+            this.repeat(event, null, 1);
+        }
+    }
+
+    onDownButtonMouseDown(event, focusInput) {
+        if (!this.props.disabled) {
+            this.inputEl.focus();
+            this.repeat(event, null, -1);
             
             event.preventDefault();
         }
     }
 
-    onDownButtonMouseup(event) {
+    onDownButtonMouseUp(event) {
         if (!this.props.disabled) {
             this.clearTimer();
         }
     }
 
-    onDownButtonMouseleave(event) {
+    onDownButtonMouseLeave(event) {
         if (!this.props.disabled) {
             this.clearTimer();
         }
     }
 
-    onInputKeydown(event) {
+    onDownButtonKeyUp(event) {
+        if (!this.props.disabled) {
+            this.clearTimer();
+        }
+    }
+    
+    onDownButtonKeyDown(event) {
+        if (event.keyCode === 32 || event.keyCode === 13) {
+            this.repeat(event, null, -1);
+        }
+    }
+
+    onInputKeyDown(event) {
         if (event.which === 38) {
-            this.spin(1);
+            this.spin(event, 1);
             event.preventDefault();
         }
         else if (event.which === 40) {
-            this.spin(-1);
+            this.spin(event, -1);
             event.preventDefault();
         }
-    }
-
-    onInputKeyPress(event) {
-        let inputChar = String.fromCharCode(event.charCode);
-        let keyPattern = /[0-9+-]/;
-        if (!keyPattern.test(inputChar) && inputChar !== this.props.decimalSeparator) {
-            event.preventDefault();
-        }
-    }
-
-    onInput(event, inputValue) {
-        this.value = this.parseValue(inputValue);
-        this.formatValue();
-        this.inputEl.value = this.valueAsString;
-        if (this.props.onChange) {
-            this.props.onChange({
-                originalEvent: event,
-                value: this.value
-            })
-        }
-        this.updateFilledState();
-    }
-
-    onBlur() {
-        this.focus = false;
-    }
-
-    onFocus() {
-        this.focus = true;
     }
 
     parseValue(val) {
-        let value;
-        val = val.split(this.props.thousandSeparator).join('');
-        if (val.trim() === '') {
-            value = this.props.min !== null ? this.props.min : null;
+        let value = val.trim();
+
+        if (val === '') {
+            value = this.props.min != null ? this.props.min : null;
         }
         else {
+            if (this.props.formatInput) {
+                val = val.replace(this.thousandRegExp, '');
+            }
+
             if (this.precision) {
-                value = parseFloat(val.replace(',', '.'));
+                val = this.props.formatInput ? val.replace(this.props.decimalSeparator || this.localeDecimalSeparator, '.') : val.replace(',', '.');
+                value = parseFloat(val);
             }
             else {
                 value = parseInt(val, 10);
@@ -204,23 +275,70 @@ export class Spinner extends Component {
         return value;
     }
 
-    formatValue() {
-        if (this.value !== null && this.value !== undefined) {
-            let textValue = String(this.value).replace('.', this.props.decimalSeparator);
-            textValue = textValue.replace(/\B(?=(\d{3})+(?!\d))/g, this.props.thousandSeparator);
-            this.valueAsString = textValue;
-        }
-        else {
-            this.valueAsString = '';
-        }
+    onInputFocus(event) {
+        DomHandler.addClass(this.element, 'p-inputwrapper-focus');
     }
 
-    handleChange(event) {
+    onInputChange(event) {
         if (this.props.onChange) {
             this.props.onChange({
                 originalEvent: event,
-                value: this.value
-            })
+                value: event.target.value,
+                stopPropagation : () =>{},
+                preventDefault : () =>{},
+                target: {
+                    name: this.props.name,
+                    id: this.props.id,
+                    value: event.target.value
+                }   
+            });
+        }
+    } 
+
+    onInputBlur(event) {
+        DomHandler.removeClass(this.element, 'p-inputwrapper-focus');
+
+        if (this.props.onChange) {
+            const parsedValue =  this.parseValue(event.target.value);
+            this.props.onChange({
+                originalEvent: event,
+                value: parsedValue,
+                stopPropagation : () =>{},
+                preventDefault : () =>{},
+                target: {
+                    name: this.props.name,
+                    id: this.props.id,
+                    value: parsedValue,
+                }
+            });
+        }
+
+        if (this.props.onBlur) {
+            this.props.onBlur(event);
+        }
+    }
+    
+    formatValue(value) {
+        if (value != null) {
+            if (this.props.formatInput) {
+                value = value.toLocaleString(undefined, {maximumFractionDigits: 20});
+    
+                if (this.props.decimalSeparator && this.props.thousandSeparator) {
+                    value = value.split(this.localeDecimalSeparator);
+    
+                    if (this.precision && value[1]) {
+                        value[1] = (this.props.decimalSeparator || this.localeDecimalSeparator) + value[1];
+                    }
+    
+                    if (this.props.thousandSeparator && value[0].length > 3) {
+                        value[0] = value[0].replace(new RegExp(`[${this.localeThousandSeparator}]`, 'gim'), this.props.thousandSeparator);
+                    }
+    
+                    value = value.join('');
+                }
+            }
+    
+            this.formattedValue = value.toString();
         }
     }
 
@@ -230,44 +348,91 @@ export class Spinner extends Component {
         }
     }
 
-    updateFilledState() {
-        this.filled = (this.value !== undefined && this.value != null);
-    }
-
-    componentWillMount() {
-        this.value = this.props.value;
-        this.formatValue();
-        this.updateFilledState();
-    }
-
     componentDidMount() {
-        this.inputEl.value = this.valueAsString;
+        if (this.props.tooltip) {
+            this.renderTooltip();
+        }
+    }
+
+    shouldComponentUpdate(nextProps) {
+        if (this.props.value !== nextProps.value) {
+            this.formatValue(nextProps.value);
+        }
+
+        return true;
+    }
+
+    componentDidUpdate(prevProps) {
+        if (this.props.tooltip && prevProps.tooltip !== this.props.tooltip) {
+            if (this.tooltip)
+                this.tooltip.updateContent(this.props.tooltip);
+            else
+                this.renderTooltip();
+        }
+    }
+
+    componentWillUnmount() {
+        if (this.tooltip) {
+            this.tooltip.destroy();
+            this.tooltip = null;
+        }
+    }
+
+    renderTooltip() {
+        this.tooltip = new Tooltip({
+            target: this.element,
+            content: this.props.tooltip,
+            options: this.props.tooltipOptions
+        });
+    }
+
+    renderInputElement() {
+        const className = classNames('p-spinner-input', this.props.inputClassName);
+        
+        return (
+            <InputText ref={(el) => this.inputEl = ReactDOM.findDOMNode(el)} id={this.props.inputId} style={this.props.inputStyle} 
+              className={className} value={this.formattedValue||''} type="text" size={this.props.size} 
+              maxLength={this.props.maxlength} disabled={this.props.disabled} required={this.props.required} pattern={this.props.pattern}
+              placeholder={this.props.placeholder} readOnly={this.props.readonly} name={this.props.name} onKeyDown={this.onInputKeyDown} 
+              onBlur={this.onInputBlur} onChange={this.onInputChange} onFocus={this.onInputFocus} 
+            />
+        );
+    }
+
+    renderUpButton() {
+        let className = classNames("p-spinner-button p-spinner-button-up p-button p-component", {
+            'p-disabled': this.props.disabled
+        });
+
+        return (
+            <button type="button" className={className} onMouseLeave={this.onUpButtonMouseLeave} onMouseDown={this.onUpButtonMouseDown} onMouseUp={this.onUpButtonMouseUp}
+                onKeyDown={this.onUpButtonKeyDown} onKeyUp={this.onUpButtonKeyUp} disabled={this.props.disabled}>
+                <span className="p-spinner-button-icon pi pi-caret-up"></span>
+            </button>
+        );
+    }
+
+    renderDownButton() {
+        let className = classNames("p-spinner-button p-spinner-button-down p-button p-component", {
+            'p-disabled': this.props.disabled
+        });
+
+        return (
+            <button type="button" className={className} onMouseLeave={this.onDownButtonMouseLeave} onMouseDown={this.onDownButtonMouseDown} onMouseUp={this.onDownButtonMouseUp} 
+                onKeyDown={this.onDownButtonKeyDown} onKeyUp={this.onDownButtonKeyUp} disabled={this.props.disabled}>
+                <span className="p-spinner-button-icon pi pi-caret-down"></span>
+            </button>
+        );
     }
 
     render() {
-
-        var styleClass = classNames("ui-spinner ui-widget ui-corner-all"),
-        upButtonClass = classNames("ui-spinner-button ui-spinner-up ui-corner-tr ui-button ui-widget ui-state-default", {
-            'ui-state-disabled': this.props.disabled
-        }),
-        downButtonClass = classNames("ui-spinner-button ui-spinner-down ui-corner-br ui-button ui-widget ui-state-default", {
-            'ui-state-disabled': this.props.disabled
-        });
-
-        var inputElement = <InputText ref={(el) => this.inputEl = ReactDOM.findDOMNode(el)} type="text" className="ui-spinner-input"
-                                size={this.props.size} maxLength={this.props.maxlength} disabled={this.props.disabled} readOnly={this.props.readonly}
-                                onKeyDown={this.onInputKeydown.bind(this)} onKeyUp={(e) => this.onInput(e, this.inputEl.value)} onKeyPress={this.onInputKeyPress.bind(this)} onBlur={this.onBlur.bind(this)} onChange={this.handleChange.bind(this)} onFocus={this.onFocus.bind(this)} />;
-
-        var upButton = <button className={upButtonClass} onMouseLeave={this.onUpButtonMouseleave.bind(this)} onMouseDown={(e) => this.onUpButtonMousedown(e, this.inputEl)} onMouseUp={this.onUpButtonMouseup.bind(this)} disabled={this.props.disabled}>
-                          <span className="fa fa-caret-up"></span>
-                       </button>;
-
-        var downButton = <button className={downButtonClass} onMouseLeave={this.onDownButtonMouseleave.bind(this)} onMouseDown={(e) => this.onDownButtonMousedown(e, this.inputEl)} onMouseUp={this.onDownButtonMouseup.bind(this)} disabled={this.props.disabled}>
-                            <span className="fa fa-caret-down"></span>
-                         </button>;
+        let className = classNames("p-spinner p-component", this.props.className, {'p-inputwrapper-filled': this.props.value != null});
+        let inputElement = this.renderInputElement();
+        let upButton = this.renderUpButton();
+        let downButton = this.renderDownButton();
 
         return (
-            <span className={styleClass} style={this.props.style}>
+            <span ref={(el) => this.element = el} id={this.props.id} className={className} style={this.props.style}>
                 {inputElement}
                 {upButton}
                 {downButton}

@@ -1,61 +1,167 @@
 import React, {Component} from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
+import Tooltip from "../tooltip/Tooltip";
+import DomHandler from '../utils/DomHandler';
 
 export class InputTextarea extends Component {
 
     static defaultProps = {
-        autoResize: false
+        autoResize: false,
+        onInput: null,
+        cols: 20,
+        rows: 2,
+        tooltip: null,
+        tooltipOptions: null
     };
 
     static propTypes = {
-        autoResize: PropTypes.bool
+        autoResize: PropTypes.bool,
+        onInput: PropTypes.func,
+        cols: PropTypes.number,
+        rows: PropTypes.number,
+        tooltip: PropTypes.string,
+        tooltipOptions: PropTypes.object
     };
     
-    constructor() {
-        super();
+    constructor(props) {
+        super(props);
         this.onFocus = this.onFocus.bind(this);
         this.onBlur = this.onBlur.bind(this);
         this.onKeyUp = this.onKeyUp.bind(this);
+        this.onInput = this.onInput.bind(this);
     }
 
     onFocus(e) {
-        if(this.props.autoResize) {
+        if (this.props.autoResize) {
             this.resize();
+        }
+
+        if (this.props.onFocus) {
+            this.props.onFocus(e);
         }
     }
 
     onBlur(e) {
-        if(this.props.autoResize) {
+        if (this.props.autoResize) {
             this.resize();
+        }
+
+        if (this.props.onBlur) {
+            this.props.onBlur(e);
         }
     }
 
     onKeyUp(e) {
-        if(this.props.autoResize) {
+        if (this.props.autoResize) {
+            this.resize();
+        }
+
+        if (this.props.onKeyUp) {
+            this.props.onKeyUp(e);
+        }
+    }
+
+    onInput(e) {
+        if (this.props.autoResize) {
+            this.resize();
+        }
+
+        if (!this.props.onChange) {
+            if (e.target.value.length > 0)
+                DomHandler.addClass(e.target, 'p-filled');
+            else
+                DomHandler.removeClass(e.target, 'p-filled');
+        }
+
+        if (this.props.onInput) {
+            this.props.onInput(e);
+        }
+    }
+
+    resize() {
+        if (!this.cachedScrollHeight) {
+            this.cachedScrollHeight = this.element.scrollHeight;
+            this.element.style.overflow = "hidden";
+        }
+
+        if (this.cachedScrollHeight !== this.element.scrollHeight) {
+            this.element.style.height = ''
+            this.element.style.height = this.element.scrollHeight + 'px';
+
+            if (parseFloat(this.element.style.height) >= parseFloat(this.element.style.maxHeight)) {
+                this.element.style.overflowY = "scroll";
+                this.element.style.height = this.element.style.maxHeight;
+            }
+            else {
+                this.element.style.overflow = "hidden";
+            }
+
+            this.cachedScrollHeight = this.element.scrollHeight;
+        }
+    }
+    
+    componentDidMount() {
+        if (this.props.tooltip) {
+            this.renderTooltip();
+        }
+
+        if (this.props.autoResize) {
             this.resize();
         }
     }
 
-    resize () {
-        let linesCount = 0,
-        lines = this.textareaElement.value.split('\n');
-
-        for(let i = lines.length-1; i >= 0 ; --i) {
-            linesCount += Math.floor((lines[i].length / parseInt(this.props.cols, 10)) + 1);
+    componentDidUpdate(prevProps) {
+        if (!DomHandler.isVisible(this.element)) {
+            return;
+        }
+        
+        if (this.props.tooltip && prevProps.tooltip !== this.props.tooltip) {
+            if (this.tooltip)
+                this.tooltip.updateContent(this.props.tooltip);
+            else
+                this.renderTooltip();
         }
 
-        this.textareaElement.rows = (linesCount >= parseInt(this.props.rows, 10)) ? (linesCount + 1) : parseInt(this.props.rows, 10);
+        if (this.props.autoResize) {
+            this.resize();
+        }
+    }
+
+    componentWillUnmount() {
+        if (this.tooltip) {
+            this.tooltip.destroy();
+            this.tooltip = null;
+        }
+    }
+
+    renderTooltip() {
+        this.tooltip = new Tooltip({
+            target: this.element,
+            content: this.props.tooltip,
+            options: this.props.tooltipOptions
+        });
     }
 
     render() {
-        var styleClass = classNames('ui-inputtext ui-corner-all ui-state-default ui-widget', this.props.className, {
-            'ui-state-disabled': this.props.disabled
+        const className = classNames('p-inputtext p-inputtextarea p-component', this.props.className, {
+            'p-disabled': this.props.disabled,
+            'p-filled': (this.props.value != null && this.props.value.toString().length > 0) || (this.props.defaultValue != null && this.props.defaultValue.toString().length > 0),
+            'p-inputtextarea-resizable': this.props.autoResize
         });
 
-        var textareaProps = Object.assign({}, this.props);
+        let textareaProps = Object.assign({}, this.props);
         delete textareaProps.autoResize;
+        delete textareaProps.onFocus;
+        delete textareaProps.onBlur;
+        delete textareaProps.onKeyUp;
+        delete textareaProps.onInput;
+        delete textareaProps.tooltip;
+        delete textareaProps.tooltipOptions;
 
-        return <textarea {...textareaProps} className={styleClass} ref={(input) => {this.textareaElement = input;}} onFocus={this.onFocus} onBlur={this.onBlur} onKeyUp={this.onKeyUp}></textarea>;
+        return (
+            <textarea {...textareaProps} className={className} ref={input => this.element = input} 
+                onFocus={this.onFocus} onBlur={this.onBlur} onKeyUp={this.onKeyUp} onInput={this.onInput}></textarea>
+        );
     }
 }

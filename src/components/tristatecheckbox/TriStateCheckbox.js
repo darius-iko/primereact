@@ -1,22 +1,40 @@
 import React, {Component} from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
+import DomHandler from '../utils/DomHandler';
+import Tooltip from "../tooltip/Tooltip";
 
 export class TriStateCheckbox extends Component {
 
     static defaultProps = {
+        id: null,
+        inputId: null,
         value: null,
+        name: null,
+        style: null,
+        className: null,
+        tooltip: null,
+        tooltipOptions: null,
         onChange: null
     };
 
     static propTypes = {
+        id: PropTypes.string,
+        inputId: PropTypes.string,
         value: PropTypes.bool,
+        name: PropTypes.string,
+        style: PropTypes.object,
+        className: PropTypes.string,
+        tooltip: PropTypes.string,
+        tooltipOptions: PropTypes.object,
         onChange: PropTypes.func
     }
     
     constructor(props) {
         super(props);
         this.onClick = this.onClick.bind(this);
+        this.onFocus = this.onFocus.bind(this);
+        this.onBlur = this.onBlur.bind(this);
     }
 
     onClick(event) {
@@ -36,25 +54,70 @@ export class TriStateCheckbox extends Component {
         if(this.props.onChange) {
             this.props.onChange({
                 originalEvent: event,
-                value: newValue
+                value: newValue,
+                stopPropagation : () =>{},
+                preventDefault : () =>{},
+                target: {
+                    name: this.props.name,
+                    id: this.props.id,
+                    value:  newValue,
+                }
             })
         }
     }
 
+    onFocus(e) {
+        DomHandler.addClass(this.box, 'p-focus');
+    }
+
+    onBlur(e) {
+        DomHandler.removeClass(this.box, 'p-focus');
+    }
+
+    componentDidMount() {
+        if (this.props.tooltip) {
+            this.renderTooltip();
+        }
+    }
+
+    componentDidUpdate(prevProps) {
+        if (this.props.tooltip && prevProps.tooltip !== this.props.tooltip) {
+            if (this.tooltip)
+                this.tooltip.updateContent(this.props.tooltip);
+            else
+                this.renderTooltip();
+        }
+    }
+
+    componentWillUnmount() {
+        if (this.tooltip) {
+            this.tooltip.destroy();
+            this.tooltip = null;
+        }
+    }
+
+    renderTooltip() {
+        this.tooltip = new Tooltip({
+            target: this.element,
+            content: this.props.tooltip,
+            options: this.props.tooltipOptions
+        });
+    }
+
     render() {
-        var boxClass = classNames('ui-chkbox-box ui-widget ui-corner-all ui-state-default', {'ui-state-active':(this.props.value || !this.props.value) && this.props.value !== null}),
-        iconClass = classNames('ui-chkbox-icon ui-c', {'fa fa-check': this.props.value === true, 'fa fa-close': this.props.value === false});
+        let containerClass = classNames('p-checkbox p-tristatecheckbox p-component', this.props.className);
+        let boxClass = classNames('p-checkbox-box p-component', {'p-highlight':(this.props.value || !this.props.value) && this.props.value !== null});
+        let iconClass = classNames('p-checkbox-icon p-c', {'pi pi-check': this.props.value === true, 'pi pi-times': this.props.value === false});
 
         return (
-                <div className='ui-chkbox ui-tristatechkbox ui-widget'>
-                    <div className="ui-helper-hidden-accessible">
-                        <input ref={(el) => this.inputEL = el} type="checkbox" readOnly/>
-                    </div>
-                    <div className={boxClass}
-                        onClick={this.onClick}>
-                        <span className={iconClass}></span>
-                    </div>
+            <div ref={(el) => this.element = el} id={this.props.id} className={containerClass} style={this.props.style} onClick={this.onClick}>
+                <div className="p-hidden-accessible">
+                    <input ref={(el) => this.inputEL = el} type="checkbox" id={this.props.inputId} name={this.props.name} onFocus={this.onFocus} onBlur={this.onBlur}/>
                 </div>
+                <div className={boxClass} ref={(el) => { this.box = el; }}>
+                    <span className={iconClass}></span>
+                </div>
+            </div>
         );
     }
 }

@@ -1,27 +1,33 @@
 import React, {Component} from 'react';
 import PropTypes from 'prop-types';
 import ReactDOM from 'react-dom';
-import { InputText } from '../inputtext/InputText';
-import { Button } from '../button/Button';
+import {InputText} from '../inputtext/InputText';
+import {Button} from '../button/Button';
 import DomHandler from '../utils/DomHandler';
 import ObjectUtils from '../utils/ObjectUtils';
+import {AutoCompletePanel} from './AutoCompletePanel';
 import classNames from 'classnames';
+import Tooltip from "../tooltip/Tooltip";
 
 export class AutoComplete extends Component {
 
     static defaultProps = {
+        id: null,
         value: null,
+        name: null,
         suggestions: null,
         field: null,
         scrollHeight: '200px',
         dropdown: false,
+        dropdownMode: 'blank',
         multiple: false,
         minLength: 1,
         delay: 300,
         style: null,
-        styleClass: null,
+        className: null,
+        inputId: null,
         inputStyle: null,
-        inputStyleClass: null,
+        inputClassName: null,
         placeholder: null,
         readonly: false,
         disabled: false,
@@ -29,29 +35,44 @@ export class AutoComplete extends Component {
         size: null,
         appendTo: null,
         tabindex: null,
+        autoFocus: false,
+        tooltip: null,
+        tooltipOptions: null,
+        completeMethod: null,
         itemTemplate: null,
         selectedItemTemplate: null,
         onChange: null,
-        completeMethod: null,
         onFocus: null,
+        onBlur: null,
         onSelect: null,
         onUnselect: null,
-        onDropdownClick: null
+        onDropdownClick: null,
+        onClick: null,
+        onDblClick: null,
+        onMouseDown: null,
+        onKeyUp: null,
+        onKeyPress: null,
+        onContextMenu: null,
+        onClear: null
     }
 
     static propTypes = {
+        id: PropTypes.string,
         value: PropTypes.any,
+        name: PropTypes.string,
         suggestions: PropTypes.array,
         field: PropTypes.string,
         scrollHeight: PropTypes.string,
         dropdown: PropTypes.bool,
+        dropdownMode: PropTypes.string,
         multiple: PropTypes.bool,
         minLength: PropTypes.number,
         delay: PropTypes.number,
         style: PropTypes.object,
-        styleClass: PropTypes.string,
+        className: PropTypes.string,
+        inputId: PropTypes.string,
         inputStyle: PropTypes.object,
-        inputStyleClass: PropTypes.string,
+        inputClassName: PropTypes.string,
         placeholder: PropTypes.string,
         readonly: PropTypes.bool,
         disabled: PropTypes.bool,
@@ -59,421 +80,593 @@ export class AutoComplete extends Component {
         size: PropTypes.number,
         appendTo: PropTypes.any,
         tabindex: PropTypes.number,
+        autoFocus: PropTypes.bool,
+        tooltip: PropTypes.string,
+        tooltipOptions: PropTypes.object,
+        completeMethod: PropTypes.func,
         itemTemplate: PropTypes.func,
         selectedItemTemplate: PropTypes.func,
         onChange: PropTypes.func,
-        completeMethod: PropTypes.func,
         onFocus: PropTypes.func,
+        onBlur: PropTypes.func,
         onSelect: PropTypes.func,
         onUnselect: PropTypes.func,
-        onDropdownClick: PropTypes.func
+        onDropdownClick: PropTypes.func,
+        onClick: PropTypes.func,
+        onDblClick: PropTypes.func,
+        onMouseDown: PropTypes.func,
+        onKeyUp: PropTypes.func,
+        onKeyPress: PropTypes.func,
+        onContextMenu: PropTypes.func,
+        onClear: PropTypes.func
     };
 
     constructor(props) {
         super(props);
-        this.state = {panelVisible: false, focus: false};
+        
+        this.onInputChange = this.onInputChange.bind(this);
+        this.onInputFocus = this.onInputFocus.bind(this);
+        this.onInputBlur = this.onInputBlur.bind(this);
+        this.onInputClick = this.onInputClick.bind(this);
+        this.onInputKeyDown = this.onInputKeyDown.bind(this);
+        this.onDropdownClick = this.onDropdownClick.bind(this);
+        this.onMultiContainerClick = this.onMultiContainerClick.bind(this);
+        this.onMultiInputFocus = this.onMultiInputFocus.bind(this);
+        this.onMultiInputBlur = this.onMultiInputBlur.bind(this);
+        this.selectItem = this.selectItem.bind(this);
     }
-
-    onInput(event) {
-        let value = event.target.value;
-        if(!this.props.multiple) {
-            this.value = value;
+    
+    onInputChange(event) {
+        //Cancel the search request if user types within the timeout
+        if (this.timeout) {
+            clearTimeout(this.timeout);
+        }
+        
+        let query = event.target.value;
+        if (!this.props.multiple) {
+            this.updateModel(event, query);
         }
 
-        if(value.length === 0) {
-           this.hide();
-        }
-
-        if(value.length >= this.props.minLength) {
-            //Cancel the search request if user types within the timeout
-            if(this.timeout) {
-                clearTimeout(this.timeout);
+        if (query.length === 0) {
+            this.hidePanel();
+            if (this.props.onClear) {
+                this.props.onClear(event);
             }
-
-            this.timeout = setTimeout(() => {
-                this.search(event, value);
-            }, this.props.delay);
         }
         else {
-            this.suggestions = null;
-            clearTimeout(this.timeout);
+            if (query.length >= this.props.minLength) {
+                this.timeout = setTimeout(() => {
+                    this.search(event, query, 'input');
+                }, this.props.delay);
+            }
+            else {
+                this.hidePanel();
+            }
         }
     }
     
-    search(event, query) {
+    onInputClick(event) {
+        if (this.documentClickListener) {
+            this.inputClick = true;
+        }
+        
+        if (this.props.onClick) {
+            this.props.onClick(event);
+        }
+    }
+
+    search(event, query, source) {
         //allow empty string but not undefined or null
-       if(query === undefined || query === null) {
-           return;
-       }
-       
-       if(this.props.completeMethod) {
+        if (query === undefined || query === null) {
+            return;
+        }
+
+        //do not search blank values on input change
+        if (source === 'input' && query.trim().length === 0) {
+            return;
+        }
+
+        if (this.props.completeMethod) {
+            this.searching = true;
+            this.showLoader();
             this.props.completeMethod({
                 originalEvent: event,
                 query: query
             });
-       }
+        }
     }
-            
-    selectItem(e, option) {
-        if(this.props.multiple) {
+
+    selectItem(event, option) {
+        if (this.props.multiple) {
             this.inputEl.value = '';
-            this.value = this.value||[];
-            if(!this.isSelected(option)) {
-                this.value.push(option);
+            if (!this.isSelected(option)) {
+                let newValue = this.props.value ? [...this.props.value, option] : [option];
+                this.updateModel(event, newValue);
             }
         }
         else {
-            this.inputEl.value = this.props.field ? ObjectUtils.resolveFieldData(option, this.props.field): option;
-            this.value = option;
+            this.updateInputField(option);
+            this.updateModel(event, option);
         }
-        
-        this.props.onChange({
-            originalEvent: e,
-            value: this.value
-        });
 
-        if(this.props.onSelect) {
+        if (this.props.onSelect) {
             this.props.onSelect({
-                originalEvent: e,
+                originalEvent: event,
                 value: option
             })
         }
-        
+
         this.inputEl.focus();
     }
     
-    show() {
-        if(!this.state.panelVisible && (this.state.focus||this.dropdownFocus)) {
-            
-            this.setState({panelVisible: true});
-            this.panel.style.zIndex = DomHandler.getZindex();
-            this.panel.style.display = "block";
-            DomHandler.fadeIn(this.panel, 200);
-        }        
+    updateModel(event, value) {
+        if (this.props.onChange) {
+            this.props.onChange({
+                originalEvent: event,
+                value: value,
+                stopPropagation : () =>{},
+                preventDefault : () =>{},
+                target: {
+                    name: this.props.name,
+                    id: this.props.id,
+                    value: value
+                }
+            });
+        }
     }
-    
-    align() {
-        if(this.props.appendTo)
-            DomHandler.absolutePosition(this.panel, (this.props.multiple ? this.multipleContainerEl : this.inputEl));
+
+    formatValue(value) {
+        if (value) {
+            if (this.props.selectedItemTemplate) {
+                const resolvedFieldData = this.props.selectedItemTemplate(value);
+                return resolvedFieldData ? resolvedFieldData : value;
+            } 
+            else if (this.props.field) {
+                const resolvedFieldData = ObjectUtils.resolveFieldData(value, this.props.field);
+                return resolvedFieldData !== null && resolvedFieldData !== undefined ? resolvedFieldData : value;
+            }
+            else
+                return value;
+        }
         else
-            DomHandler.relativePosition(this.panel, (this.props.multiple ? this.multipleContainerEl : this.inputEl));
+            return '';
     }
-    
-    hide() {
-        this.setState({panelVisible: false});
-        this.panel.style.display = 'none';  
+
+    updateInputField(value) {
+        const formattedValue = this.formatValue(value);
+        this.inputEl.value = formattedValue;
     }
-    
-    handleDropdownClick(event) {
-        if(this.props.onDropdownClick) {
+
+    showPanel() {
+        if (this.focus) {
+            this.alignPanel();
+            
+            if (this.panel && this.panel.element && !this.panel.element.offsetParent) {
+                this.panel.element.style.zIndex = String(DomHandler.generateZIndex());
+                this.panel.element.style.display = "block";
+                
+                setTimeout(() => {
+                    if (this.panel && this.panel.element) {
+                        DomHandler.addClass(this.panel.element, 'p-input-overlay-visible');
+                        DomHandler.removeClass(this.panel.element, 'p-input-overlay-hidden');
+                    }
+                }, 1);
+
+                this.alignPanel();
+                this.bindDocumentClickListener();
+            }
+        }
+    }
+
+    alignPanel() {
+        if (this.panel.element.offsetParent) {
+            let target = this.props.multiple ? this.multiContainer : this.inputEl;
+        
+            if (this.props.appendTo) {
+                this.panel.element.style.minWidth = DomHandler.getWidth(target) + 'px';
+                DomHandler.absolutePosition(this.panel.element, target);
+            }
+            else {
+                DomHandler.relativePosition(this.panel.element, target);
+            }
+        }
+    }
+
+    hidePanel() {
+        DomHandler.addClass(this.panel.element, 'p-input-overlay-hidden');
+        DomHandler.removeClass(this.panel.element, 'p-input-overlay-visible');
+
+        setTimeout(() => {
+            if (this.panel && this.panel.element) {
+                this.panel.element.style.display = 'none';
+                DomHandler.removeClass(this.panel.element, 'p-input-overlay-hidden');
+            }
+        }, 150);
+
+        this.unbindDocumentClickListener();
+    }
+
+    onDropdownClick(event) {
+        this.inputEl.focus();
+        if (this.documentClickListener) {
+            this.dropdownClick = true;
+        }
+        
+        if (this.props.dropdownMode === 'blank')
+            this.search(event, '', 'dropdown');
+        else if (this.props.dropdownMode === 'current')
+            this.search(event, this.inputEl.value, 'dropdown');
+
+        if (this.props.onDropdownClick) {
             this.props.onDropdownClick({
                 originalEvent: event,
                 query: this.inputEl.value
             });
         }
     }
-    
-    removeItem(e, itemIndex) {
-        let removedValue = this.value.splice(itemIndex, 1)[0];
-        if(this.props.onUnselect) {
+
+    removeItem(event, index) {
+        let removedValue = this.props.value[index];
+        let newValue = this.props.value.filter((val, i) => (index !== i));
+        this.updateModel(event, newValue);
+        
+        if (this.props.onUnselect) {
             this.props.onUnselect({
-                originalEvent: e,
+                originalEvent: event,
                 value: removedValue
             })
         }
-
-        this.props.onChange({
-            originalEvent: e,
-            value: this.value
-        });
     }
-        
-    onKeydown(event) {
-        if(this.state.panelVisible) {
-            let highlightItemIndex = this.findOptionIndex(this.state.highlightOption);
+
+    onInputKeyDown(event) {
+        if (this.isPanelVisible()) {
+            let highlightItem = DomHandler.findSingle(this.panel.element, 'li.p-highlight');
 
             switch(event.which) {
                 //down
                 case 40:
-                    if(highlightItemIndex !== -1) {
-                        var nextItemIndex = highlightItemIndex + 1;
-                        if(nextItemIndex !== (this.suggestions.length)) {
-                            this.highlightOption = this.suggestions[nextItemIndex];
-                            this.highlightOptionChanged = true;
+                    if (highlightItem) {
+                        let nextElement = highlightItem.nextElementSibling;
+                        if (nextElement) {
+                            DomHandler.addClass(nextElement, 'p-highlight');
+                            DomHandler.removeClass(highlightItem, 'p-highlight');
+                            DomHandler.scrollInView(this.panel.element, nextElement);
                         }
-                    }
+                    }    
                     else {
-                        this.highlightOption = this.suggestions[0];
-                    }
-                    event.preventDefault();
-                break;
-                
-                //up
-                case 38:
-                    if(highlightItemIndex > 0) {
-                        let prevItemIndex = highlightItemIndex - 1;
-                        this.highlightOption = this.suggestions[prevItemIndex];
-                        this.highlightOptionChanged = true;
+                        DomHandler.addClass(this.panel.element.firstChild.firstChild, 'p-highlight');
                     }
                     
                     event.preventDefault();
                 break;
-                
-                //enter
-                case 13:
-                    if(this.highlightOption) {
-                        this.selectItem(event, this.highlightOption);
-                        this.hide();
+
+                //up
+                case 38:
+                    if (highlightItem) {
+                        let previousElement = highlightItem.previousElementSibling;
+                        if (previousElement) {
+                            DomHandler.addClass(previousElement, 'p-highlight');
+                            DomHandler.removeClass(highlightItem, 'p-highlight');
+                            DomHandler.scrollInView(this.panel.element, previousElement);
+                        }
                     }
+                    
                     event.preventDefault();
                 break;
-                
+
+                //enter,tab
+                case 13:
+                    if (highlightItem) {
+                        this.selectItem(event, this.props.suggestions[DomHandler.index(highlightItem)]);
+                        this.hidePanel();
+                    }
+                    
+                    event.preventDefault();
+                break;
+
                 //escape
                 case 27:
-                    this.hide();
+                    this.hidePanel();
                     event.preventDefault();
                 break;
 
-                
                 //tab
                 case 9:
-                    if(this.highlightOption) {
-                        this.selectItem(event, this.highlightOption);
+                    if (highlightItem) {
+                        this.selectItem(event, this.props.suggestions[DomHandler.index(highlightItem)]);
                     }
-                    this.hide();
+                    
+                    this.hidePanel();
                 break;
 
-                default: 
+                default:
                 break;
-                
             }
-        } else {
-            if(event.which === 40 && this.suggestions) {
-                this.search(event,event.target.value);
-            }
-        }
+        } 
 
-        this.setState({highlightOption: this.highlightOption});
-        
-        if(this.props.multiple) {
+        if (this.props.multiple) {
             switch(event.which) {
                 //backspace
                 case 8:
-                    if(this.value && this.value.length && !this.inputEl.value) {
-                        let removedValue = this.value.pop();
-                        if(this.props.onUnselect) {
+                    if (this.props.value && this.props.value.length && !this.inputEl.value) {
+                        let removedValue = this.props.value[this.props.value.length - 1];
+                        let newValue = this.props.value.slice(0, -1);
+                        
+                        if (this.props.onUnselect) {
                             this.props.onUnselect({
                                 originalEvent: event,
                                 value: removedValue
                             })
                         }
-                        this.props.onChange({
-                            originalEvent: event,
-                            value: this.value
-                        });
+                        
+                        this.updateModel(event, newValue);
                     }
                 break;
 
-                default: 
+                default:
                 break;
             }
         }
     }
-    
+
     onInputFocus(event) {
-        this.setState({focus: true});
-        if(this.props.onFocus) {
-            this.props.onFocus({
-                originalEvent: event
-            })
+        this.focus = true;
+        
+        if (this.props.onFocus) {
+            this.props.onFocus(event);
         }
-    }
 
-    onInputChange(event) {
-        this.props.onChange({
-            originalEvent: event,
-            value: event.target.value
-        });
-
-        if(this.props.completeMethod) {
-            this.props.completeMethod({
-                originalEvent: event,
-                query: event.target.value
-            });
-        }
+        DomHandler.addClass(this.container, 'p-inputwrapper-focus');
     }
     
-    onBlur() {
-        this.setState({focus: false});
+    onInputBlur(event) {
+        this.focus = false;
+
+        if (this.props.onBlur) {
+            this.props.onBlur(event);
+        }
+
+        DomHandler.removeClass(this.container, 'p-inputwrapper-focus');
     }
     
-    onDropdownFocus() {
-        this.dropdownFocus = true;
+    onMultiContainerClick(event) {
         this.inputEl.focus();
+        if (this.documentClickListener) {
+            this.inputClick = true;
+        }
+        
+        if (this.props.onClick) {
+            this.props.onClick(event);
+        }
     }
     
-    onDropdownBlur() {
-        this.dropdownFocus = false;
+    onMultiInputFocus(event) {
+        this.onInputFocus(event);
+        DomHandler.addClass(this.multiContainer, 'p-focus');
+    }
+    
+    onMultiInputBlur(event) {
+        this.onInputBlur(event);
+        DomHandler.removeClass(this.multiContainer, 'p-focus');
     }
     
     isSelected(val) {
         let selected = false;
-        if(this.value && this.value.length) {
-            for(let i = 0; i < this.value.length; i++) {
-                if(ObjectUtils.equals(this.value[i], val)) {
+        if (this.props.value && this.props.value.length) {
+            for (let i = 0; i < this.props.value.length; i++) {
+                if (ObjectUtils.equals(this.props.value[i], val)) {
                     selected = true;
                     break;
                 }
             }
         }
+        
         return selected;
     }
-    
-    findOptionIndex(option) {        
+
+    findOptionIndex(option) {
         let index = -1;
-        if(this.suggestions) {
-            for(let i = 0; i < this.suggestions.length; i++) {
-                if(ObjectUtils.equals(option, this.suggestions[i])) {
+        if (this.suggestions) {
+            for (let i = 0; i < this.suggestions.length; i++) {
+                if (ObjectUtils.equals(option, this.suggestions[i])) {
                     index = i;
                     break;
                 }
             }
         }
-                
+
         return index;
     }
 
-    onMouseEnterForItem(suggestion) {
-        this.setState({highlightOption: suggestion});
-    }
-
-    onMouseLeaveForItem() {
-        this.setState({highlightOption: null});
-    }
-
-    writeValue(value) {        
-        if(this.props.multiple) {
-            this.value = value;
-        }
-        else {
-            this.value = value ? this.props.field ? ObjectUtils.resolveFieldData(value, this.props.field) : value : '';
-            this.inputEl.value = this.value;
-        }
-    }
-
     componentDidMount() {
-        this.panel = this.autoComplete.querySelector('div.ui-autocomplete-panel');
-
-        this.documentClickListener = () => {
-            this.hide();
+        if (this.props.autoFocus && this.inputEl) {
+            this.inputEl.focus();
         }
 
-        document.addEventListener('click', this.documentClickListener); 
-
-        if(this.props.appendTo) {
-            if(this.props.appendTo === 'body')
-                document.body.appendChild(this.panel);
-            else
-                DomHandler.appendChild(this.panel, this.props.appendTo);
+        if (this.props.tooltip) {
+            this.renderTooltip();
         }
-        this.writeValue(this.props.value);
-       
-    }
-
-    componentWillReceiveProps(nextProps) {
-        var newSuggestions = nextProps.suggestions;
-        if (newSuggestions && this.state.focus) {
-            this.suggestions = newSuggestions;
-            if(this.suggestions && this.suggestions.length) {
-                this.show();
-                this.align();
-            }
-        } 
     }
 
     componentWillUnmount() {
-        if (this.documentClickListener) {
-            document.removeEventListener('click', this.documentClickListener);
+        this.unbindDocumentClickListener();
+
+        if (this.tooltip) {
+            this.tooltip.destroy();
+            this.tooltip = null;
         }
     }
 
-    componentDidUpdate(prevProps, prevState) {
-        if(prevState.highlightOption !== this.state.highlightOption) {
-            let listItem = this.panel.querySelector('li.ui-state-highlight');
-            if(listItem) {
-                DomHandler.scrollInView(this.panel, listItem);
-            }
-        }   
+    componentDidUpdate(prevProps) {
+        if (this.searching) {
+            if (this.props.suggestions && this.props.suggestions.length)
+                this.showPanel();
+            else
+                this.hidePanel();
+
+            this.hideLoader();
+        }
+
+        this.searching = false;
+
+        if (this.inputEl && !this.props.multiple) {
+            this.updateInputField(this.props.value);
+        }
+
+        if (this.props.tooltip && prevProps.tooltip !== this.props.tooltip) {
+            if (this.tooltip)
+                this.tooltip.updateContent(this.props.tooltip);
+            else
+                this.renderTooltip();
+        }
+    }
+
+    showLoader() {
+        this.loader.style.visibility = 'visible';
+    }
+
+    hideLoader() {
+        this.loader.style.visibility = 'hidden';
+    }
+
+    renderTooltip() {
+        this.tooltip = new Tooltip({
+            target: this.container,
+            content: this.props.tooltip,
+            options: this.props.tooltipOptions
+        });
     }
     
-    render() {
-        var styleClass = classNames('ui-autocomplete ui-widget', this.props.styleClass, {
-            'ui-autocomplete-dd': this.props.dropdown,
-            'ui-autocomplete-multiple': this.props.multiple
+    renderSimpleAutoComplete() {
+        const inputClassName = classNames('p-autocomplete-input', this.props.inputClassName, {
+            'p-autocomplete-dd-input': this.props.dropdown
         });
-
-        if(this.props.multiple) {
-            var multipleContainerClass = classNames("ui-autocomplete-multiple-container ui-widget ui-inputtext ui-state-default ui-corner-all", {
-                'ui-state-disabled': this.props.disabled,
-                'ui-state-focus': this.state.focus
-            }),
-            multipleContainer = (
-                <ul ref={(el) => {this.multipleContainerEl = el}} className={multipleContainerClass}>
-                    { 
-                        this.value && this.value.map((val, index) => {
-                            var itemContainer = this.props.selectedItemTemplate ? this.props.selectedItemTemplate(val) : (<span className="ui-autocomplete-token-label">{this.props.field ? ObjectUtils.resolveFieldData(val, this.props.field) : val}</span>);
-                            return (<li className="ui-autocomplete-token ui-state-highlight ui-corner-all" key={index + 'multipleItem'}>
-                                        <span className="ui-autocomplete-token-icon fa fa-fw fa-close" onClick={(e) => this.removeItem(e, index)}></span>
-                                        {itemContainer}
-                                    </li>);
-                        })
-                    }
-                 
-                    <li className="ui-autocomplete-input-token">
-                        <InputText ref={(el) => {this.inputEl = ReactDOM.findDOMNode(el)}} type="text" disabled={this.props.disabled} placeholder={this.props.placeholder} tabIndex={this.props.tabindex} onInput={this.onInput.bind(this)} 
-                            onKeyDown={this.onKeydown.bind(this)} onFocus={this.onInputFocus.bind(this)} onBlur={this.onBlur.bind(this)} autoComplete="off" />
-                    </li>
-                </ul>
-            );
-        }
-        else {
-            var inputClass = classNames('ui-autocomplete-input', this.props.inputClassName, {
-                'ui-autocomplete-dd-input': this.props.dropdown
-            }),
-            input = (<InputText ref={(el) => {this.inputEl = ReactDOM.findDOMNode(el)}}  type="text" className={inputClass} style={this.props.inputStyle} autoComplete="off" 
-                         onInput={this.onInput.bind(this)} onKeyDown={this.onKeydown.bind(this)} onFocus={this.onInputFocus.bind(this)} onChange={this.onInputChange.bind(this)}
-                         onBlur={this.onBlur.bind(this)} placeholder={this.props.placeholder} size={this.props.size} maxLength={this.props.maxlength} tabIndex={this.props.tabindex}
-                         readOnly={this.props.readonly} disabled={this.props.disabled} />);
             
-        }
-        
-        var dropdownButton = (this.props.dropdown && (<Button type="button" icon="fa-fw fa-caret-down" className="ui-autocomplete-dropdown" disabled={this.props.disabled}
-                                onClick={this.handleDropdownClick.bind(this)} onFocus={this.onDropdownFocus.bind(this)} onBlur={this.onDropdownBlur.bind(this)} />))
-        
-        if(this.suggestions) {
-            var suggestions = this.suggestions.map((suggestion, index) => {
-                var itemClass = classNames('ui-autocomplete-list-item ui-corner-all', {
-                    'ui-state-highlight': (this.state.highlightOption===suggestion)
-                }), 
-                itemContent = this.props.itemTemplate ? this.props.itemTemplate(suggestion) : this.props.field ? ObjectUtils.resolveFieldData(suggestion, this.props.field): suggestion;
-                return <li className={itemClass} onClick={(event) => this.selectItem(event, suggestion)} key={index + '_item'} onMouseEnter={(e) => this.onMouseEnterForItem(suggestion)} onMouseLeave={this.onMouseLeaveForItem.bind(this)}>{itemContent}</li>;
+        return (
+            <InputText ref={(el) => this.inputEl = ReactDOM.findDOMNode(el)} id={this.props.inputId} type="text" name={this.props.name} 
+                        defaultValue={this.formatValue(this.props.value)}
+                        className={inputClassName} style={this.props.inputStyle} autoComplete="off"
+                        readOnly={this.props.readonly} disabled={this.props.disabled} placeholder={this.props.placeholder} size={this.props.size}
+                        maxLength={this.props.maxlength} tabIndex={this.props.tabindex}
+                        onBlur={this.onInputBlur} onFocus={this.onInputFocus} onChange={this.onInputChange}
+                        onMouseDown={this.props.onMouseDown} onKeyUp={this.props.onKeyUp} onKeyDown={this.onInputKeyDown}
+                        onKeyPress={this.props.onKeyPress} onContextMenu={this.props.onContextMenu} 
+                        onClick={this.onInputClick} onDoubleClick={this.props.onDblClick} />
+        );
+    }
+    
+    renderChips() {
+        if (this.props.value && this.props.value.length) {
+            return this.props.value.map((val, index) => {
+                return (
+                    <li key={index + 'multi-item'} className="p-autocomplete-token p-highlight">
+                        <span className="p-autocomplete-token-icon pi pi-fw pi-times" onClick={(e) => this.removeItem(e, index)}></span>
+                        <span className="p-autocomplete-token-label">{this.formatValue(val)}</span>
+                    </li>
+                );
             });
         }
-
-        var hasSuggestions = this.suggestions && this.suggestions.length;
+        else {
+            return null;
+        }
+    }
+    
+    renderMultiInput() {
+        return (
+            <li className="p-autocomplete-input-token">
+                <input ref={(el) => this.inputEl = el} type="text" disabled={this.props.disabled} placeholder={this.props.placeholder}
+                       autoComplete="off" tabIndex={this.props.tabindex} onChange={this.onInputChange} id={this.props.inputId} name={this.props.name}
+                       style={this.props.inputStyle} className={this.props.inputClassName}
+                       onKeyUp={this.props.onKeyUp} onKeyDown={this.onInputKeyDown} onKeyPress={this.props.onKeyPress}
+                       onFocus={this.onMultiInputFocus} onBlur={this.onMultiInputBlur} />
+            </li>
+        );
+    }
+    
+    renderMultipleAutoComplete() {
+        let multiContainerClass = classNames("p-autocomplete-multiple-container p-component p-inputtext", {
+            'p-disabled': this.props.disabled
+        });
+        let tokens = this.renderChips();
+        let input = this.renderMultiInput();
 
         return (
-            <span className={styleClass} style={this.props.style} ref={(el) => {this.autoComplete = ReactDOM.findDOMNode(el)}}>
-                {input}
-                {multipleContainer}
-                {dropdownButton}
+                <ul ref={(el) => {this.multiContainer = el}} className={multiContainerClass} onContextMenu={this.props.onContextMenu} onMouseDown={this.props.onMouseDown}
+                        onClick={this.onMultiContainerClick} onDoubleClick={this.props.onDblClick} >
+                    {tokens}
+                    {input}
+                </ul>
+        );
+    }
+    
+    renderDropdown() {
+        return (
+            <Button type="button" icon="pi pi-fw pi-chevron-down" className="p-autocomplete-dropdown" disabled={this.props.disabled} onClick={this.onDropdownClick} />
+        );
+    }
 
-                <div className="ui-autocomplete-panel ui-widget-content ui-corner-all ui-shadow" style={{display: hasSuggestions ? 'block': 'none', width: this.props.appendTo ? 'auto' : '100%', maxHeight: this.props.scrollHeight}}>
-                    { this.state.panelVisible && (<ul className="ui-autocomplete-items ui-autocomplete-list ui-widget-content ui-widget ui-corner-all ui-helper-reset">
-                            {suggestions}
-                        </ul>)
-                    }
-                </div>
+    renderLoader() {
+        return (
+            <i ref={(el) => this.loader = el} className="p-autocomplete-loader pi pi-spinner pi-spin" style={{visibility: 'hidden'}}></i>
+        );
+    }
+    
+    bindDocumentClickListener() {
+        if (!this.documentClickListener) {
+            this.documentClickListener = (event) => {
+                if (event.which === 3) {
+                    return;
+                }
+                
+                if (!this.inputClick && !this.dropdownClick) {
+                    this.hidePanel();
+                }
+                    
+                this.inputClick = false;
+                this.dropdownClick = false;
+            };
+
+            document.addEventListener('click', this.documentClickListener);
+        }
+    }
+    
+    unbindDocumentClickListener() {
+        if (this.documentClickListener) {
+            document.removeEventListener('click', this.documentClickListener);
+            this.documentClickListener = null;
+        }
+    }
+    
+    isPanelVisible() {
+        return this.panel.element.offsetParent != null;
+    }
+
+    render() {
+        let input, dropdown;
+        let className = classNames('p-autocomplete p-component', this.props.className, {
+            'p-autocomplete-dd': this.props.dropdown,
+            'p-autocomplete-multiple': this.props.multiple,
+            'p-inputwrapper-filled': this.props.value,
+            'p-inputwrapper-focus': this.focus
+        });
+        let loader = this.renderLoader();
+
+        if (this.props.multiple)
+            input = this.renderMultipleAutoComplete();
+        else
+            input = this.renderSimpleAutoComplete();
+        
+        if (this.props.dropdown) {
+            dropdown = this.renderDropdown();
+        }
+
+        return (
+            <span ref={(el) => this.container = el} id={this.props.id} style={this.props.style} className={className} >
+                {input}
+                {loader}
+                {dropdown}
+                <AutoCompletePanel ref={(el) => this.panel = el} suggestions={this.props.suggestions} field={this.props.field} 
+                            appendTo={this.props.appendTo} itemTemplate={this.props.itemTemplate} onItemClick={this.selectItem}/>
             </span>
         );
     }

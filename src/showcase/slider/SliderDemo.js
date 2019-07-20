@@ -1,21 +1,26 @@
 import React, { Component } from 'react';
-import {Link} from 'react-router';
+import {Link} from 'react-router-dom';
 import { Slider } from '../../components/slider/Slider';
 import { InputText } from '../../components/inputtext/InputText';
 import {TabView,TabPanel} from '../../components/tabview/TabView';
-import {CodeHighlight} from '../../components/codehighlight/CodeHighlight';
+import {CodeHighlight} from '../codehighlight/CodeHighlight';
 
 export class SliderDemo extends Component {
 
     constructor() {
         super();
-        this.state = { val2: 50, rangeValues: [20, 80] };
+        this.state = { 
+            val1: null,
+            val2: 50, 
+            val3: null,
+            val4: null,
+            rangeValues: [20, 80] 
+        };
         this.onChangeSlider1 = this.onChangeSlider1.bind(this);
         this.onChangeSlider2 = this.onChangeSlider2.bind(this);
         this.onChangeSlider3 = this.onChangeSlider3.bind(this);
         this.onChangeSlider4 = this.onChangeSlider4.bind(this);
         this.onChangeRangeSlider = this.onChangeRangeSlider.bind(this);
-        this.onChangeSlider5 = this.onChangeSlider5.bind(this);
     }
 
     onChangeSlider1(e) {
@@ -46,14 +51,10 @@ export class SliderDemo extends Component {
         this.setState({ rangeValues: e.value });
     }
 
-    onChangeSlider5(e) {
-        this.setState({ val5: e.value });
-    }
-
     render() {
         return (
             <div>
-                <div className="content-section">
+                <div className="content-section introduction">
                     <div className="feature-intro">
                         <h1>Slider</h1>
                         <p>Slider is a component to provide input using dragging of a handle.</p>
@@ -62,23 +63,20 @@ export class SliderDemo extends Component {
 
                 <div className="content-section implementation">
                     <h3>Basic: {this.state.val1}</h3>
-                    <Slider style={{ width: '200px' }} onChange={this.onChangeSlider1} />
+                    <Slider value={this.state.val1} onChange={this.onChangeSlider1} style={{width: '14em'}}  />
 
                     <h3>Input: {this.state.val2}</h3>
-                    <InputText value={this.state.val2} style={{ width: '190px' }} type="number" onChange={this.onChangeSlider2} />
-                    <Slider style={{ width: '200px' }} value={this.state.val2} onChange={this.onChangeSlider2} />
+                    <InputText value={this.state.val2} style={{width: '14em'}} type="number" onChange={this.onChangeSlider2} />
+                    <Slider value={this.state.val2} onChange={this.onChangeSlider2} style={{width: '14em'}} />
 
-                    <h3>Animate: {this.state.val3}</h3>
-                    <Slider style={{ width: '200px' }} onChange={this.onChangeSlider3} animate={true} />
-
-                    <h3>Step: {this.state.val4}</h3>
-                    <Slider style={{ width: '200px' }} onChange={this.onChangeSlider4} step={20} />
+                    <h3>Step: {this.state.val3}</h3>
+                    <Slider value={this.state.val3} onChange={this.onChangeSlider3} step={20} style={{width: '14em'}} />
 
                     <h3>Range: {this.state.rangeValues[0]},{this.state.rangeValues[1]}</h3>
-                    <Slider style={{ width: '200px' }} value={this.state.rangeValues} onChange={this.onChangeRangeSlider} range={true} />
+                    <Slider value={this.state.rangeValues} onChange={this.onChangeRangeSlider} range={true} style={{width: '14em'}} />
 
-                    <h3>Vertical: {this.state.val5}</h3>
-                    <Slider style={{ height: '200px' }} onChange={this.onChangeSlider5} orientation="vertical" />
+                    <h3>Vertical: {this.state.val4}</h3>
+                    <Slider value={this.state.val4} onChange={this.onChangeSlider4} orientation="vertical" style={{height: '14em'}} />
                 </div>
 
                 <SliderDoc></SliderDoc>
@@ -89,54 +87,52 @@ export class SliderDemo extends Component {
 
 class SliderDoc extends Component {
 
+    shouldComponentUpdate(){
+        return false;
+    }
+
     render() {
         return (
-            <div className="content-section source">
+            <div className="content-section documentation">
     <TabView effect="fade">
         <TabPanel header="Documentation">
             <h3>Import</h3>
 <CodeHighlight className="language-javascript">
 {`
-import {Slider} from 'primereact/components/slider/Slider';
+import {Slider} from 'primereact/slider';
 
 `}
 </CodeHighlight>
 
             <h3>Getting Started</h3>
-            <p>Slider is used as a controlled input with dragging of a handle.</p>
+            <p>Slider is used as a controlled input with <i>value</i> and <i>onChange</i> properties.</p>
                     
-<CodeHighlight className="language-markup">
+<CodeHighlight className="language-jsx">
 {`
-<Slider style={{ width: '200px' }} onChange={this.onChangeSlider1} />
-
-`}
-</CodeHighlight>
-
-<CodeHighlight className="language-javascript">
-{`
-constructor() {
-    super();
-    this.state = { val2: 50, rangeValues: [20, 80] };
-    this.onChangeSlider1 = this.onChangeSlider1.bind(this);
-}
-
-onChangeSlider1(e) {
-    this.setState({ val1: e.value });
-}
+<Slider value={this.state.value} onChange={(e) => this.setState({value: e.value})} />
 
 `}
 </CodeHighlight>
 
             <h3>Range</h3>
-            <p>Range slider provides two handles to define two values. In this case, value binding should refer to an array.</p>
-<CodeHighlight className="language-markup">
+            <p>Range slider provides two handles to define two values. Enable <i>range</i> property and bind an array to implement a range slider.</p>
+<CodeHighlight className="language-jsx">
 {`
-<Slider style={{ width: '200px' }} value={this.state.rangeValues} onChange={this.onChangeRangeSlider} range={true} />
+<Slider value={this.state.rangeValues} onChange={(e) => this.setState({rangeValues: e.value})} range={true} />
 
 `}
 </CodeHighlight>
 
-            <h3>Attributes</h3>
+            <h3>Orientation</h3>
+            <p>Default layout of slider is horizontal, use <i>orientation</i> property for the alternative vertical mode.</p>
+            <CodeHighlight className="language-jsx">
+{`
+<Slider value={this.state.value} onChange={(e) => this.setState({value: e.value})} orientation="vertical" />
+
+`}
+</CodeHighlight>
+
+            <h3>Properties</h3>
             <div className="doc-tablewrapper">
                 <table className="doc-table">
                     <thead>
@@ -148,7 +144,19 @@ onChangeSlider1(e) {
                         </tr>
                     </thead>
                     <tbody>
-                         <tr>
+                        <tr>
+                            <td>id</td>
+                            <td>string</td>
+                            <td>null</td>
+                            <td>Unique identifier of the element.</td>
+                        </tr>
+                        <tr>
+                            <td>value</td>
+                            <td>number</td>
+                            <td>0</td>
+                            <td>Value of the component.</td>
+                        </tr>
+                        <tr>
                             <td>animate</td>
                             <td>boolean</td>
                             <td>false</td>
@@ -167,6 +175,12 @@ onChangeSlider1(e) {
                             <td>Maximum boundary value.</td>
                         </tr>
                         <tr>
+                            <td>orientation</td>
+                            <td>string</td>
+                            <td>horizontal</td>
+                            <td>Orientation of the slider, valid values are horizontal and vertical.</td>
+                        </tr>
+                        <tr>
                            <td>step</td>
                            <td>number</td>
                            <td>1</td>
@@ -178,12 +192,6 @@ onChangeSlider1(e) {
                            <td>false</td>
                            <td>When speficed, allows two boundary values to be picked.</td>
                          </tr>
-                         <tr>
-                            <td>orientation</td>
-                            <td>string</td>
-                            <td>horizontal</td>
-                            <td>Orientation of the slider, valid values are horizontal and vertical.</td>
-                          </tr>
                         <tr>
                             <td>style</td>
                             <td>string</td>
@@ -195,6 +203,18 @@ onChangeSlider1(e) {
                             <td>string</td>
                             <td>null</td>
                             <td>Style class of the element.</td>
+                        </tr>
+                        <tr>
+                            <td>disabled</td>
+                            <td>boolean</td>
+                            <td>false</td>
+                            <td>When present, it specifies that the component should be disabled.</td>
+                        </tr>
+                        <tr>
+                            <td>tabIndex</td>
+                            <td>string</td>
+                            <td>null</td>
+                            <td>Index of the element in tabbing order.</td>
                         </tr>
                     </tbody>
                 </table>
@@ -214,28 +234,20 @@ onChangeSlider1(e) {
                         <tr>
                             <td>onChange</td>
                             <td>event.originalEvent: Slide event <br />
-                                event.value: New value. <br/>
-                                event.values: Values in range mode
-                                </td>
+                                event.value: New value.
+                            </td>
                             <td>Callback to invoke on value change via slide.</td>
+                        </tr>
+                        <tr>
+                            <td>onSlideEnd</td>
+                            <td>event.originalEvent: Slide event <br />
+                                event.value: New value.
+                            </td>
+                            <td>Callback to invoke when slide ends.</td>
                         </tr>
                     </tbody>
                 </table>
             </div>
-<CodeHighlight className="language-markup">
-{`
-<Slider style={{ width: '200px' }} onChange={this.onChangeSlider1} />
-
-`}
-</CodeHighlight>
-<CodeHighlight className="language-javascript">
-{`
-onChangeSlider1(e) {
-    this.setState({ val1: e.value });
-}
-
-`}
-</CodeHighlight>
 
             <h3>Styling</h3>
             <p>Following is the list of structural style classes, for theming classes visit <Link to="/theming"> theming</Link> page.</p>
@@ -249,11 +261,11 @@ onChangeSlider1(e) {
                     </thead>
                     <tbody>
                         <tr>
-                            <td>ui-slider</td>
+                            <td>p-slider</td>
                             <td>Container element</td>
                         </tr>
                         <tr>
-                            <td>ui-slider-handle</td>
+                            <td>p-slider-handle</td>
                             <td>Handle element.</td>
                         </tr>
                     </tbody>
@@ -265,19 +277,31 @@ onChangeSlider1(e) {
         </TabPanel>
 
         <TabPanel header="Source">
+            <a href="https://github.com/primefaces/primereact/tree/master/src/showcase/slider" className="btn-viewsource" target="_blank" rel="noopener noreferrer">
+                <span>View on GitHub</span>
+            </a>
 <CodeHighlight className="language-javascript">
 {`
+import React, {Component} from 'react';
+import {Slider} from 'primereact/slider';
+import {InputText} from 'primereact/inputtext';
+
 export class SliderDemo extends Component {
 
     constructor() {
         super();
-        this.state = { val2: 50, rangeValues: [20, 80] };
+        this.state = { 
+            val1: null,
+            val2: 50, 
+            val3: null,
+            val4: null,
+            rangeValues: [20, 80] 
+        };
         this.onChangeSlider1 = this.onChangeSlider1.bind(this);
         this.onChangeSlider2 = this.onChangeSlider2.bind(this);
         this.onChangeSlider3 = this.onChangeSlider3.bind(this);
         this.onChangeSlider4 = this.onChangeSlider4.bind(this);
         this.onChangeRangeSlider = this.onChangeRangeSlider.bind(this);
-        this.onChangeSlider5 = this.onChangeSlider5.bind(this);
     }
 
     onChangeSlider1(e) {
@@ -308,14 +332,10 @@ export class SliderDemo extends Component {
         this.setState({ rangeValues: e.value });
     }
 
-    onChangeSlider5(e) {
-        this.setState({ val5: e.value });
-    }
-
     render() {
         return (
             <div>
-                <div className="content-section">
+                <div className="content-section introduction">
                     <div className="feature-intro">
                         <h1>Slider</h1>
                         <p>Slider is a component to provide input using dragging of a handle.</p>
@@ -324,26 +344,21 @@ export class SliderDemo extends Component {
 
                 <div className="content-section implementation">
                     <h3>Basic: {this.state.val1}</h3>
-                    <Slider style={{ width: '200px' }} onChange={this.onChangeSlider1} />
+                    <Slider value={this.state.val1} onChange={this.onChangeSlider1} style={{width: '14em'}}  />
 
                     <h3>Input: {this.state.val2}</h3>
-                    <InputText value={this.state.val2} style={{ width: '190px' }} type="number" onChange={this.onChangeSlider2} />
-                    <Slider style={{ width: '200px' }} value={this.state.val2} onChange={this.onChangeSlider2} />
+                    <InputText value={this.state.val2} style={{width: '14em'}} type="number" onChange={this.onChangeSlider2} />
+                    <Slider value={this.state.val2} onChange={this.onChangeSlider2} style={{width: '14em'}} />
 
-                    <h3>Animate: {this.state.val3}</h3>
-                    <Slider style={{ width: '200px' }} onChange={this.onChangeSlider3} animate={true} />
-
-                    <h3>Step: {this.state.val4}</h3>
-                    <Slider style={{ width: '200px' }} onChange={this.onChangeSlider4} step={20} />
+                    <h3>Step: {this.state.val3}</h3>
+                    <Slider value={this.state.val3} onChange={this.onChangeSlider3} step={20} style={{width: '14em'}} />
 
                     <h3>Range: {this.state.rangeValues[0]},{this.state.rangeValues[1]}</h3>
-                    <Slider style={{ width: '200px' }} value={this.state.rangeValues} onChange={this.onChangeRangeSlider} range={true} />
+                    <Slider value={this.state.rangeValues} onChange={this.onChangeRangeSlider} range={true} style={{width: '14em'}} />
 
-                    <h3>Vertical: {this.state.val5}</h3>
-                    <Slider style={{ height: '200px' }} onChange={this.onChangeSlider5} orientation="vertical" />
+                    <h3>Vertical: {this.state.val4}</h3>
+                    <Slider value={this.state.val4} onChange={this.onChangeSlider4} orientation="vertical" style={{height: '14em'}} />
                 </div>
-
-                <SliderDoc></SliderDoc>
             </div>
         );
     }

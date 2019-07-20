@@ -1,124 +1,165 @@
 import React, {Component} from 'react';
 import PropTypes from 'prop-types';
+import ReactDOM from 'react-dom';
 import classNames from 'classnames';
 import DomHandler from '../utils/DomHandler';
 
 export class OverlayPanel extends Component {
     
     static defaultProps = {
+        id: null,
         dismissable: true,
         showCloseIcon: false,
         style: null,
         className: null,
-        appendTo: null
+        appendTo: null,
+        onHide: null
     }
 
     static propTypes = {
+        id: PropTypes.string,
         dismissable: PropTypes.bool,
         showCloseIcon: PropTypes.bool,
         style: PropTypes.object,
         className: PropTypes.string,
-        appendTo: PropTypes.any
+        appendTo: PropTypes.any,
+        onHide: PropTypes.func
     }
 
     constructor(props) {
         super(props);
-        this.onPanelClick = this.onPanelClick.bind(this);
         this.onCloseClick = this.onCloseClick.bind(this);
     }
-
-    componentDidMount() {
-        if(this.props.dismissable) {
+    
+    bindDocumentClickListener() {
+        if(!this.documentClickListener && this.props.dismissable) {
             this.documentClickListener = this.onDocumentClick.bind(this);
             document.addEventListener('click', this.documentClickListener);
         }
     }
-
-    componentWillUnmount() {
+    
+    unbindDocumentClickListener() {
         if(this.documentClickListener) {
             document.removeEventListener('click', this.documentClickListener);
+            this.documentClickListener = null;
         }
     }
 
-    onDocumentClick() {
-        if(!this.selfClick && !this.targetEvent) {
+    componentWillUnmount() {
+        this.unbindDocumentClickListener();
+    }
+
+    onDocumentClick(event) {
+        if(!this.container.contains(event.target) && this.target && this.target !== event.target && !this.target.contains(event.target)) {
             this.hide();
-        }
-        this.selfClick = false;
-        this.targetEvent = false;
-    }
-
-    onPanelClick() {
-        if(this.props.dismissable) {
-            this.selfClick = true;
         }
     }
 
     onCloseClick(event) {
         this.hide();
         
-        if(this.dismissable) {
-            this.selfClick = true;
-        }
-        
         event.preventDefault();
     }
 
-    toggle(event, target) {
-        let currentTarget = (target||event.currentTarget||event.target);
-                                
-         if(this.isVisible())
+    toggle(event, target) {                                
+        if (this.isVisible()) {
             this.hide();
-        else
-            this.show(event, currentTarget);
-        
-        if(this.props.dismissable) {
-            this.targetEvent = true;
+
+            if (this.hasTargetChanged(event, target)) {
+                this.target = target||event.currentTarget||event.target;
+
+                setTimeout(() => {
+                    this.show(event, this.target);
+                }, 200);
+            }
+        }
+        else {
+            this.show(event, target);
         }
     }
 
     show(event, target) {
-        if(this.props.dismissable) {
-            this.targetEvent = true;
-        }
+        this.target = target||event.currentTarget||event.target;
+
+        this.bindDocumentClickListener();
         
-        this.container.style.zIndex = DomHandler.getZindex();
+        this.container.style.zIndex = String(DomHandler.generateZIndex());
 
         if(this.isVisible()) {
-            DomHandler.absolutePosition(this.container, target);
+            this.align();
         }
         else {
             this.container.style.display = 'block';
-            DomHandler.absolutePosition(this.container, target);
+            this.align();
             DomHandler.fadeIn(this.container, 250);
         }
     }
 
+    align() {
+        if (this.target) {
+            DomHandler.absolutePosition(this.container, this.target);
+
+            if (DomHandler.getOffset(this.container).top < DomHandler.getOffset(this.target).top) {
+                DomHandler.addClass(this.container, 'p-overlaypanel-flipped');
+            }
+        }
+    }
+
     hide() {
-        if(this.isVisible()) {
+        if (this.isVisible()) {
             this.container.style.display = 'none';
+            DomHandler.removeClass(this.container, 'p-overlaypanel-flipped');
+            this.unbindDocumentClickListener();
+
+            if (this.props.onHide) {
+                this.props.onHide();
+            }
         }
     }
 
     isVisible() {
-        return this.container.offsetParent;
+        return this.container && this.container.offsetParent;
     }
 
-    render() {
-        var className = classNames('ui-overlaypanel ui-widget ui-widget-content ui-corner-all ui-shadow', this.props.className);
+    hasTargetChanged(event, target) {
+        return this.target != null && this.target !== (target||event.currentTarget||event.target);
+    }
+
+    renderCloseIcon() {
         if(this.props.showCloseIcon) {
-            var closeIcon = <a href="#" className="ui-overlaypanel-close ui-state-default" onClick={this.onCloseClick}>
-                                <span className="fa fa-fw fa-close"></span>
-                            </a>;
+            return (
+                <button className="p-overlaypanel-close p-link" onClick={this.onCloseClick}>
+                    <span className="p-overlaypanel-close-icon pi pi-times"></span>
+                </button>
+            );
         }
+        else {
+            return null;
+        }
+    }
+
+    renderElement() {
+        let className = classNames('p-overlaypanel p-component', this.props.className);
+        let closeIcon = this.renderCloseIcon();
 
         return (
-            <div className={className} style={this.props.style} onClick={this.onPanelClick} ref={(el) => {this.container = el;}}>
-                <div className="ui-overlaypanel-content">
+            <div ref={el => this.container = el} id={this.props.id} className={className} style={this.props.style}>
+                <div className="p-overlaypanel-content">
                     {this.props.children}
                 </div>
                 {closeIcon}
             </div>
         );
+    }
+
+    render() {
+        let element = this.renderElement();
+
+        if (this.props.appendTo) {
+            return ReactDOM.createPortal(element, this.props.appendTo);
+        }
+        else {
+            return element;
+        }
     }
 }

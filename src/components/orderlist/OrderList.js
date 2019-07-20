@@ -1,262 +1,184 @@
-import React, { Component } from 'react';
+import React, {Component} from 'react';
 import PropTypes from 'prop-types';
-import { Button } from '../button/Button';
+import {OrderListControls} from './OrderListControls';
+import {OrderListSubList} from './OrderListSubList';
 import DomHandler from '../utils/DomHandler';
+import ObjectUtils from '../utils/ObjectUtils';
 import classNames from 'classnames'
 
 export class OrderList extends Component {
 
     static defaultProps = {
+        id: null,
         value: null,
         header: null,
         style: null,
-        styleClass: null,
+        className: null,
         listStyle: null,
         responsive: false,
-        onReorder: null,
+        dragdrop: false,
+        tabIndex: '0',
+        onChange: null,
         itemTemplate: null
     }
 
-    static propsTypes = {
+    static propTypes = {
+        id: PropTypes.string,
         value: PropTypes.array,
         header: PropTypes.string,
-        style: PropTypes.string,
-        styleClass: PropTypes.string,
-        listStyle: PropTypes.string,
+        style: PropTypes.object,
+        className: PropTypes.string,
+        listStyle: PropTypes.object,
         responsive: PropTypes.bool,
-        onReorder: PropTypes.func,
+        dragdrop: PropTypes.bool,
+        tabIndex: PropTypes.string,
+        onChange: PropTypes.func,
         itemTemplate: PropTypes.func
     }
 
     constructor(props) {
         super(props);
-        this.state = {values: this.props.value, selectedItems: []};
+        this.state = {
+            selection: []
+        };
+
+        this.onItemClick = this.onItemClick.bind(this);
+        this.onItemKeyDown = this.onItemKeyDown.bind(this);
+        this.onReorder = this.onReorder.bind(this);
     }
 
-    onItemClick(event, item) {
-        let metaKey = (event.metaKey || event.ctrlKey);
-        let index = this.findIndexInList(item, this.selectedItems);
+    onItemClick(event) {
+        let metaKey = (event.originalEvent.metaKey || event.originalEvent.ctrlKey);
+        let index = ObjectUtils.findIndexInList(event.value, this.state.selection);
         let selected = (index !== -1);
-
-        if (selected && metaKey) {
-            this.selectedItems.splice(index, 1);
+        let selection;
+        
+        if (selected) {
+            if (metaKey)
+                selection = this.state.selection.filter((val, i) => i !== index);
+            else
+                selection = [event.value];
         }
         else {
-            this.selectedItems = (metaKey) ? this.selectedItems || [] : [];
-            this.selectedItems.push(item);
-        }
-
-        this.setState({selectedItems: this.selectedItems});
-    }
-
-    isSelected(item) {
-        return this.findIndexInList(item, this.state.selectedItems) !== -1;
-    }
-
-    findIndexInList(item, list) {
-        let index = -1;
-
-        if (list) {
-            for (let i = 0; i < list.length; i++) {
-                if (list[i] === item) {
-                    index = i;
-                    break;
-                }
-            }
-        }
-
-        return index;
-    }
-
-    moveUp(event, listElement) {
-        if (this.selectedItems) {
-            this.value = [...this.state.values];
-            for (let i = 0; i < this.selectedItems.length; i++) {
-                let selectedItem = this.selectedItems[i];
-                let selectedItemIndex = this.findIndexInList(selectedItem, this.value);
-
-                if (selectedItemIndex !== 0) {
-                    let movedItem = this.value[selectedItemIndex];
-                    let temp = this.value[selectedItemIndex - 1];
-                    this.value[selectedItemIndex - 1] = movedItem;
-                    this.value[selectedItemIndex] = temp;
-                }
-                else {
-                    break;
-                }
-            }
-            
-            this.setState({values: this.value});
-            this.movedUp = true;
-            if(this.props.onReorder) {
-                this.props.onReorder({
-                    originalEvent: event,
-                    value: this.value
-                })
-            }
-        }
-    }
-
-    moveTop(event, listElement) {
-        if (this.selectedItems) {
-            this.value = [...this.state.values];
-            for (let i = 0; i < this.selectedItems.length; i++) {
-                let selectedItem = this.selectedItems[i];
-                let selectedItemIndex = this.findIndexInList(selectedItem, this.value);
-
-                if (selectedItemIndex !== 0) {
-                    let movedItem = this.value.splice(selectedItemIndex, 1)[0];
-                    this.value.unshift(movedItem);
-                    listElement.scrollTop = 0;
-                }
-                else {
-                    break;
-                }
-            }
-            this.setState({values: this.value});
-            if(this.props.onReorder) {
-                this.props.onReorder({
-                    originalEvent: event,
-                    value: this.value
-                })
-            }
-            listElement.scrollTop = 0;
-        }
-    }
-
-    moveDown(event, listElement) {
-        if (this.selectedItems) {
-            this.value = [...this.state.values];
-            for (let i = this.selectedItems.length - 1; i >= 0; i--) {
-                let selectedItem = this.selectedItems[i];
-                let selectedItemIndex = this.findIndexInList(selectedItem, this.value);
-
-                if (selectedItemIndex !== (this.value.length - 1)) {
-                    let movedItem = this.value[selectedItemIndex];
-                    let temp = this.value[selectedItemIndex + 1];
-                    this.value[selectedItemIndex + 1] = movedItem;
-                    this.value[selectedItemIndex] = temp;
-                }
-                else {
-                    break;
-                }
-            }
-
-            this.setState({values: this.value});
-            this.movedDown = true;
-            if(this.props.onReorder) {
-                this.props.onReorder({
-                    originalEvent: event,
-                    value: this.value
-                })
-            }
-        }
-    }
-
-    moveBottom(event, listElement) {
-        if (this.selectedItems) {
-            this.value = [...this.state.values];
-            for (let i = this.selectedItems.length - 1; i >= 0; i--) {
-                let selectedItem = this.selectedItems[i];
-                let selectedItemIndex = this.findIndexInList(selectedItem, this.value);
-
-                if (selectedItemIndex !== (this.value.length - 1)) {
-                    let movedItem = this.value.splice(selectedItemIndex, 1)[0];
-                    this.value.push(movedItem);
-                }
-                else {
-                    break;
-                }
-            }
-
-            this.setState({values: this.value});
-            if(this.props.onReorder) {
-                this.props.onReorder({
-                    originalEvent: event,
-                    value: this.value
-                })
-            }
-            listElement.scrollTop = listElement.scrollHeight;
-        }
-    }
-
-    updateScrollView() {
-        if(this.movedUp||this.movedDown) {
-            let listItems = this.listContainer.getElementsByClassName('ui-state-highlight');
-            let listItem;
-            
-            if(this.movedUp)
-                listItem = listItems[0];
+            if (metaKey)
+                selection = [...this.state.selection, event.value];
             else
-                listItem = listItems[listItems.length - 1];
+                selection = [event.value];
+        }
             
-            DomHandler.scrollInView(this.listContainer, listItem);
-            this.movedUp = false;
-            this.movedDown = false;
+        this.setState({selection: selection});
+    }
+
+    onItemKeyDown(event) {
+        let listItem = event.originalEvent.currentTarget;
+        
+        switch(event.originalEvent.which) {
+            //down
+            case 40:
+                var nextItem = this.findNextItem(listItem);
+                if (nextItem) {
+                    nextItem.focus();
+                }
+                
+                event.originalEvent.preventDefault();
+            break;
+            
+            //up
+            case 38:
+                var prevItem = this.findPrevItem(listItem);
+                if (prevItem) {
+                    prevItem.focus();
+                }
+                
+                event.originalEvent.preventDefault();
+            break;
+            
+            //enter
+            case 13:
+                this.onItemClick(event);
+                event.originalEvent.preventDefault();
+            break;
+
+            default:
+            break;
         }
     }
-    
-    componentWillReceiveProps(nextProps) {
-        var newValue = nextProps.value;
-        if (newValue !== this.state.values) {
-            this.setState({values: newValue});
-        } 
-    }    
 
-    componentDidUpdate(prevProps, prevState) {
-        if(prevState.values !== this.state.value) { 
-            this.updateScrollView();
+    findNextItem(item) {
+        let nextItem = item.nextElementSibling;
+
+        if (nextItem)
+            return !DomHandler.hasClass(nextItem, 'p-orderlist-item') ? this.findNextItem(nextItem) : nextItem;
+        else
+            return null;
+    }
+
+    findPrevItem(item) {
+        let prevItem = item.previousElementSibling;
+        
+        if (prevItem)
+            return !DomHandler.hasClass(prevItem, 'p-orderlist-item') ? this.findPrevItem(prevItem) : prevItem;
+        else
+            return null;
+    } 
+
+    onReorder(event) {
+        if (this.props.onChange) {
+            this.props.onChange({
+                event: event.originalEvent,
+                value: event.value
+            });
+        }
+
+        this.reorderDirection = event.direction;
+    }
+
+    componentDidUpdate() {
+        if(this.reorderDirection) {
+            this.updateListScroll();
+            this.reorderDirection = null;
+        }
+    }
+
+    updateListScroll() {
+        let listItems = DomHandler.find(this.subList.listElement, '.p-orderlist-item.p-highlight');
+
+        if(listItems && listItems.length) {
+            switch(this.reorderDirection) {
+                case 'up':
+                    DomHandler.scrollInView(this.subList.listElement, listItems[0]);
+                break;
+                
+                case 'top':
+                    this.subList.listElement.scrollTop = 0;
+                break;
+                
+                case 'down':
+                    DomHandler.scrollInView(this.subList.listElement, listItems[listItems.length - 1]);
+                break;
+                
+                case 'bottom':
+                    this.subList.listElement.scrollTop = this.subList.listElement.scrollHeight;
+                break;
+                
+                default:
+                break;
+            }
         }
     }
 
     render() {
-        var styleClass = classNames('ui-orderlist ui-grid ui-widget', this.props.styleClass, {
-            'ui-grid-responsive': this.props.responsive
+        let className = classNames('p-orderlist p-component', this.props.className, {
+            'p-orderlist-responsive': this.props.responsive
         });
 
-        var upButton = <Button type="button" icon="fa-angle-up" onClick={(e) => this.moveUp(e, this.listContainer)}></Button>,
-            topButton = <Button type="button" icon="fa-angle-double-up" onClick={(e) => this.moveTop(e, this.listContainer)}></Button>,
-            downButton = <Button type="button" icon="fa-angle-down" onClick={(e) => this.moveDown(e, this.listContainer)}></Button>,
-            bottomButton = <Button type="button" icon="fa-angle-double-down" onClick={(e) => this.moveBottom(e, this.listContainer)}></Button>;
-
-        var controls = (
-            <div className="ui-orderlist-controls ui-grid-col-2">
-                {upButton}
-                {topButton}
-                {downButton}
-                {bottomButton}
-            </div>
-        );
-
-        var content = (
-            <div className="ui-grid-col-10">
-                {this.props.header && <div className="ui-orderlist-caption ui-widget-header ui-corner-top">{this.props.header}</div>}
-                <ul ref={(el) => this.listContainer = el} className="ui-widget-content ui-orderlist-list ui-corner-bottom" style={this.props.listStyle}>
-                    {
-                        this.state.values && this.state.values.map((item, i) => {
-                            
-                            var listItemContent = this.props.itemTemplate ? this.props.itemTemplate(item) : item,
-                            listStyleClass = classNames('ui-orderlist-item', {
-                                'ui-state-highlight': this.isSelected(item)
-                            });
-
-                            return (
-                                <li key={i + '_orderlistitem'} className={listStyleClass} onClick={(e) => this.onItemClick(e, item)}>
-                                    {listItemContent}
-                                </li>
-                            )
-                        })
-                    }
-                </ul>
-            </div>
-        );
-
         return (
-            <div className={styleClass} style={this.props.style}>
-                <div className="ui-grid-row">
-                    {controls}
-                    {content}
-                </div>
+            <div ref={(el) => this.element = el} id={this.props.id} className={className} style={this.props.style}>
+                <OrderListControls value={this.props.value} selection={this.state.selection} onReorder={this.onReorder} />
+                <OrderListSubList ref={(el) => this.subList = el} value={this.props.value} selection={this.state.selection} onItemClick={this.onItemClick} onItemKeyDown={this.onItemKeyDown} 
+                            itemTemplate={this.props.itemTemplate} header={this.props.header} listStyle={this.props.listStyle}
+                            dragdrop={this.props.dragdrop} onDragStart={this.onDragStart} onDragEnter={this.onDragEnter} onDragEnd={this.onDragEnd} onDragLeave={this.onDragEnter} onDrop={this.onDrop}
+                            onChange={this.props.onChange} tabIndex={this.props.tabIndex} />
             </div>
         );
     }

@@ -1,25 +1,22 @@
 import React, {Component} from 'react';
-import {Link} from 'react-router';
+import {Link} from 'react-router-dom';
 import {RadioButton} from '../../components/radiobutton/RadioButton';
 import {TabView,TabPanel} from '../../components/tabview/TabView';
-import {CodeHighlight} from '../../components/codehighlight/CodeHighlight';
+import {CodeHighlight} from '../codehighlight/CodeHighlight';
 
 export class RadioButtonDemo extends Component {
         
     constructor() {
         super();
-        this.state = {};
-        this.onCityChange = this.onCityChange.bind(this);
-    }
-
-    onCityChange(e) {
-        this.setState({city: e.value});
+        this.state = {
+            city: null
+        };
     }
 
     render() {
         return (
             <div>
-                <div className="content-section">
+                <div className="content-section introduction">
                     <div className="feature-intro">
                         <h1>RadioButton</h1>
                         <p>RadioButton is an extension to standard radio button element with skinning capabilities.</p>
@@ -27,19 +24,23 @@ export class RadioButtonDemo extends Component {
                 </div>
 
                 <div className="content-section implementation">
-                    <div className="ui-g" style={{width:'250px',marginBottom:'10px'}}>
-                        <div className="ui-g-12">
-                            <RadioButton value="New York" label="New York" onChange={this.onCityChange} checked={this.state.city === 'New York'} />
+                    <div className="p-grid" style={{width:'250px',marginBottom:'10px'}}>
+                        <div className="p-col-12">
+                            <RadioButton inputId="rb1" name="city" value="New York" onChange={(e) => this.setState({city: e.value})} checked={this.state.city === 'New York'} />
+                            <label htmlFor="rb1" className="p-radiobutton-label">New York</label>
                         </div>
-                        <div className="ui-g-12">
-                            <RadioButton value="San Francisco" label="San Francisco" onChange={this.onCityChange} checked={this.state.city === 'San Francisco'} />
+                        <div className="p-col-12">
+                            <RadioButton inputId="rb2" name="city" value="San Francisco" onChange={(e) => this.setState({city: e.value})} checked={this.state.city === 'San Francisco'} />
+                            <label htmlFor="rb2" className="p-radiobutton-label">San Francisco</label>
                         </div>
-                        <div className="ui-g-12">
-                            <RadioButton value="Los Angeles" label="Los Angeles" onChange={this.onCityChange} checked={this.state.city === 'Los Angeles'} />
+                        <div className="p-col-12">
+                            <RadioButton inputId="rb3" name="city" value="Los Angeles" onChange={(e) => this.setState({city: e.value})} checked={this.state.city === 'Los Angeles'} />
+                            <label htmlFor="rb3" className="p-radiobutton-label">Los Angeles</label>
                         </div>
                     </div>
                     Selected City : {this.state.city}
                 </div>
+
                 <RadioButtonDoc></RadioButtonDoc>
             </div>
         )
@@ -48,54 +49,34 @@ export class RadioButtonDemo extends Component {
 
 class RadioButtonDoc extends Component {
 
+    shouldComponentUpdate(){
+        return false;
+    }
+
     render() {
         return (
-            <div className="content-section source">
+            <div className="content-section documentation">
                 <TabView>
                     <TabPanel header="Documentation">
                         <h3>Import</h3>
 <CodeHighlight className="language-javascript">
 {`
-import {RadioButton} from 'primereact/components/radiobutton/RadioButton';
+import {RadioButton} from 'primereact/radiobutton';
 
 `}
 </CodeHighlight>
 
                         <h3>Getting Started</h3>
-                        <p>Checkbox is used as a controlled input with checked and onChange properties.</p>
-<CodeHighlight className="language-markup">
+                        <p>RadioButton is used as a controlled input with checked and onChange properties.</p>
+<CodeHighlight className="language-jsx">
 {`
-<RadioButton value="val1" onChange={this.onChange} checked={this.state.checked} />
-<RadioButton value="val2" onChange={this.onChange} checked={this.state.checked} />
+<RadioButton value="val1" name="city" onChange={(e) => this.setState({value: e.value})} checked={this.state.value === 'val1'} />
+<RadioButton value="val2" name="city" onChange={(e) => this.setState({value: e.value})} checked={this.state.value === 'val1'} />
 
 `}
 </CodeHighlight>
 
-<CodeHighlight className="language-javascript">
-{`
-constructor() {
-    super();
-    this.state = {};
-    this.onCityChange = this.onCityChange.bind(this);
-}
-
-onCityChange(e) {
-    this.setState({city: e.value});
-}
-
-`}
-</CodeHighlight>
-
-                    <h4>Label</h4>
-                    <p>The label attribute provides a label text for the radio button. This label is also clickable and selects value.</p>
-<CodeHighlight className="language-markup">
-{`
-<RadioButton label="I accept the terms" onChange={this.onChange} checked={this.state.checked} />
-
-`}
-</CodeHighlight>
-
-                    <h3>Attributes</h3>
+                    <h3>Properties</h3>
                     <div className="doc-tablewrapper">
                         <table className="doc-table">
                             <thead>
@@ -108,22 +89,70 @@ onCityChange(e) {
                             </thead>
                             <tbody>
                                 <tr>
+                                    <td>id</td>
+                                    <td>string</td>
+                                    <td>null</td>
+                                    <td>Unique identifier of the element.</td>
+                                </tr>
+                                <tr>
+                                    <td>inputId</td>
+                                    <td>string</td>
+                                    <td>null</td>
+                                    <td>Unique identifier of the inner native radiobutton.</td>
+                                </tr>
+                                <tr>
+                                    <td>name</td>
+                                    <td>string</td>
+                                    <td>null</td>
+                                    <td>Name of the checkbox element .</td>
+                                </tr>
+                                <tr>
                                     <td>value</td>
                                     <td>any</td>
                                     <td>null</td>
                                     <td>Value of the radiobutton.</td>
                                 </tr>
                                 <tr>
-                                    <td>label</td>
-                                    <td>string</td>
-                                    <td>null</td>
-                                    <td>Label of the radiobutton.</td>
-                                </tr>
-                                <tr>
                                     <td>checked</td>
                                     <td>boolean</td>
                                     <td>false</td>
                                     <td>Specifies whether a radiobutton should be checked or not.</td>
+                                </tr>
+                                <tr>
+                                    <td>style</td>
+                                    <td>string</td>
+                                    <td>null</td>
+                                    <td>Inline style of the element.</td>
+                                </tr>
+                                <tr>
+                                    <td>className</td>
+                                    <td>string</td>
+                                    <td>null</td>
+                                    <td>Style class of the element.</td>
+                                </tr>
+                                <tr>
+                                    <td>disabled</td>
+                                    <td>boolean</td>
+                                    <td>false</td>
+                                    <td>When present, it specifies that the element value cannot be altered.</td>
+                                </tr>
+                                <tr>
+                                    <td>required</td>
+                                    <td>boolean</td>
+                                    <td>false</td>
+                                    <td>When present, it specifies that an input field must be filled out before submitting the form.</td>
+                                </tr>
+                                <tr>
+                                    <td>tooltip</td>
+                                    <td>any</td>
+                                    <td>null</td>
+                                    <td>Content of the tooltip.</td>
+                                </tr>
+                                <tr>
+                                    <td>tooltipOptions</td>
+                                    <td>object</td>
+                                    <td>null</td>
+                                    <td>Configuration of the tooltip, refer to the tooltip documentation for more information.</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -163,19 +192,19 @@ onCityChange(e) {
                             </thead>
                             <tbody>
                                 <tr>
-                                    <td>ui-radiobutton</td>
+                                    <td>p-radiobutton</td>
                                     <td>Container element</td>
                                 </tr>
                                 <tr>
-                                    <td>ui-radiobutton-box</td>
+                                    <td>p-radiobutton-box</td>
                                     <td>Container of icon.</td>
                                 </tr>
                                 <tr>
-                                    <td>ui-radiobutton-icon</td>
+                                    <td>p-radiobutton-icon</td>
                                     <td>Icon element.</td>
                                 </tr>
                                 <tr>
-                                    <td>ui-radiobutton-label</td>
+                                    <td>p-radiobutton-label</td>
                                     <td>Label element.</td>
                                 </tr>
                             </tbody>
@@ -186,24 +215,27 @@ onCityChange(e) {
                     <p>None.</p>
                 </TabPanel>
                 <TabPanel header="Source">
+                    <a href="https://github.com/primefaces/primereact/tree/master/src/showcase/radiobutton" className="btn-viewsource" target="_blank" rel="noopener noreferrer">
+                        <span>View on GitHub</span>
+                    </a>
 <CodeHighlight className="language-javascript">
 {`
+import React, {Component} from 'react';
+import {RadioButton} from 'primereact/radiobutton';
+
 export class RadioButtonDemo extends Component {
         
     constructor() {
         super();
-        this.state = {};
-        this.onCityChange = this.onCityChange.bind(this);
-    }
-
-    onCityChange(e) {
-        this.setState({city: e.value});
+        this.state = {
+            city: null
+        };
     }
 
     render() {
         return (
             <div>
-                <div className="content-section">
+                <div className="content-section introduction">
                     <div className="feature-intro">
                         <h1>RadioButton</h1>
                         <p>RadioButton is an extension to standard radio button element with skinning capabilities.</p>
@@ -211,20 +243,22 @@ export class RadioButtonDemo extends Component {
                 </div>
 
                 <div className="content-section implementation">
-                    <div className="ui-g" style={{width:'250px',marginBottom:'10px'}}>
-                        <div className="ui-g-12">
-                            <RadioButton value="New York" label="New York" onChange={this.onCityChange} checked={this.state.city === 'New York'} />
+                    <div className="p-grid" style={{width:'250px',marginBottom:'10px'}}>
+                        <div className="p-col-12">
+                            <RadioButton inputId="rb1" name="city" value="New York" onChange={(e) => this.setState({city: e.value})} checked={this.state.city === 'New York'} />
+                            <label htmlFor="rb1" className="p-radiobutton-label">New York</label>
                         </div>
-                        <div className="ui-g-12">
-                            <RadioButton value="San Francisco" label="San Francisco" onChange={this.onCityChange} checked={this.state.city === 'San Francisco'} />
+                        <div className="p-col-12">
+                            <RadioButton inputId="rb2" name="city" value="San Francisco" onChange={(e) => this.setState({city: e.value})} checked={this.state.city === 'San Francisco'} />
+                            <label htmlFor="rb2" className="p-radiobutton-label">San Francisco</label>
                         </div>
-                        <div className="ui-g-12">
-                            <RadioButton value="Los Angeles" label="Los Angeles" onChange={this.onCityChange} checked={this.state.city === 'Los Angeles'} />
+                        <div className="p-col-12">
+                            <RadioButton inputId="rb3" name="city" value="Los Angeles" onChange={(e) => this.setState({city: e.value})} checked={this.state.city === 'Los Angeles'} />
+                            <label htmlFor="rb3" className="p-radiobutton-label">Los Angeles</label>
                         </div>
                     </div>
                     Selected City : {this.state.city}
                 </div>
-                <RadioButtonDoc></RadioButtonDoc>
             </div>
         )
     }

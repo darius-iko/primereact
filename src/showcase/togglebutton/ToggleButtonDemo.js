@@ -1,30 +1,23 @@
 import React, {Component} from 'react';
-import {Link} from 'react-router';
+import {Link} from 'react-router-dom';
 import {ToggleButton} from '../../components/togglebutton/ToggleButton';
 import {TabView,TabPanel} from '../../components/tabview/TabView';
-import {CodeHighlight} from '../../components/codehighlight/CodeHighlight';
+import {CodeHighlight} from '../codehighlight/CodeHighlight';
 
 export class ToggleButtonDemo extends Component {
 
     constructor() {
         super();
-        this.state = {};
-        this.onChangeBasic = this.onChangeBasic.bind(this);
-        this.onChangeCustom = this.onChangeCustom.bind(this);
-    }
-
-    onChangeBasic(e) {
-        this.setState({checked1:e.value});
-    }
-
-    onChangeCustom(e) {
-        this.setState({checked2:e.value});
+        this.state = {
+            checked1: false,
+            checked2: false
+        };
     }
 
     render() {
         return (
             <div>
-                <div className="content-section">
+                <div className="content-section introduction">
                     <div className="feature-intro">
                         <h1>ToggleButton</h1>
                         <p>ToggleButton is used to select a boolean value using a button.</p>
@@ -33,12 +26,12 @@ export class ToggleButtonDemo extends Component {
 
                 <div className="content-section implementation">
                     <h3>Basic</h3>
-                    <ToggleButton style={{width:'150px'}} checked={this.state.checked1} onChange={this.onChangeBasic}/>
+                    <ToggleButton style={{width:'150px'}} checked={this.state.checked1} onChange={(e) => this.setState({checked1: e.value})} />
                     <p>Selected Value: {this.state.checked1 ? 'true' : 'false'}</p>
 
                     <h3>Custom</h3>
-                    <ToggleButton style={{width:'150px'}} onLabel="I confirm" offLabel="I reject" onIcon="fa-check-square" offIcon="fa-square"
-                                checked={this.state.checked2} onChange={this.onChangeCustom}/>
+                    <ToggleButton style={{width:'150px'}} onLabel="I confirm" offLabel="I reject" onIcon="pi pi-check" offIcon="pi pi-times"
+                                checked={this.state.checked2} onChange={(e) => this.setState({checked2: e.value})} />
                     <p>Selected Value: {this.state.checked2 ? 'true' : 'false'}</p>
                 </div>
 
@@ -50,60 +43,45 @@ export class ToggleButtonDemo extends Component {
 
 class ToggleButtonDoc extends Component {
 
+    shouldComponentUpdate(){
+        return false;
+    }
+
     render() {
         return (
-            <div className="content-section source">
+            <div className="content-section documentation">
     <TabView effect="fade">
         <TabPanel header="Documentation">
             <h3>Import</h3>
 <CodeHighlight className="language-javascript">
 {`
-import {ToggleButton} from 'primereact/components/togglebutton/ToggleButton';
+import {ToggleButton} from 'primereact/togglebutton';
 
 `}
 </CodeHighlight>
 
             <h3>Getting Started</h3>
-            <p>ToggleButton is used as a controlled input with checked and onChange properties.</p>
+            <p>ToggleButton is used as a controlled input with <i>checked</i> and <i>onChange</i> properties.</p>
                     
-<CodeHighlight className="language-markup">
+<CodeHighlight className="language-jsx">
 {`
-<ToggleButton style={{width:'150px'}} checked={this.state.checked1} onChange={this.onChangeBasic}/>
+<ToggleButton checked={this.state.checked1} onChange={(e) => this.setState({checked1: e.value})} />
 
 `}
 </CodeHighlight>
 
-<CodeHighlight className="language-javascript">
+            <h3>Labels and Icons</h3>
+            <p>Icons and Labels can be customized using <i>onLabel</i>, <i>offLabel</i>, <i>onIcon</i> and <i>offIcon</i> properties.</p>
+
+<CodeHighlight className="language-jsx">
 {`
- constructor() {
-    super();
-    this.state = {};
-    this.onChangeBasic = this.onChangeBasic.bind(this);
-}
-
-onChangeBasic(e) {
-    this.setState({checked1:e.value});
-}
-
-render() {
-    return (
-        <ToggleButton style={{width:'150px'}} checked={this.state.checked1} onChange={this.onChangeBasic}/>
-    );
-}
-`}
-</CodeHighlight>
-
-            <h3>Customization</h3>
-            <p>Icons and Labels can be customized using onLabel, offLabel, onIcon and OffIcon attributes.</p>
-<CodeHighlight className="language-markup">
-{`
-<ToggleButton style={{width:'150px'}} onLabel="I confirm" offLabel="I reject" onIcon="fa-check-square" offIcon="fa-square"
-                                checked={this.state.checked2} onChange={this.onChangeCustom}/>
+ToggleButton onLabel="I confirm" offLabel="I reject" onIcon="pi pi-check" offIcon="pi pi-times"
+                                checked={this.state.checked2} onChange={(e) => this.setState({checked2: e.value})} />
 
 `}
 </CodeHighlight>
 
-            <h3>Attributes</h3>
+            <h3>Properties</h3>
             <div className="doc-tablewrapper">
                 <table className="doc-table">
                     <thead>
@@ -115,17 +93,11 @@ render() {
                         </tr>
                     </thead>
                     <tbody>
-                         <tr>
-                            <td>onLabel</td>
-                            <td>string</td>
-                            <td>yes</td>
-                            <td>Label for the on state.</td>
-                        </tr>
                         <tr>
-                            <td>offLabel</td>
+                            <td>id</td>
                             <td>string</td>
-                            <td>no</td>
-                            <td>Label for the off state.</td>
+                            <td>null</td>
+                            <td>Unique identifier of the element.</td>
                         </tr>
                         <tr>
                             <td>onIcon</td>
@@ -140,13 +112,25 @@ render() {
                             <td>Icon for the off state.</td>
                         </tr>
                         <tr>
+                            <td>onLabel</td>
+                            <td>string</td>
+                            <td>yes</td>
+                            <td>Label for the on state.</td>
+                        </tr>
+                        <tr>
+                            <td>offLabel</td>
+                            <td>string</td>
+                            <td>no</td>
+                            <td>Label for the off state.</td>
+                        </tr>
+                        <tr>
                             <td>style</td>
                             <td>string</td>
                             <td>null</td>
                             <td>Inline style of the element.</td>
                         </tr>
                         <tr>
-                            <td>styleClass</td>
+                            <td>className</td>
                             <td>string</td>
                             <td>null</td>
                             <td>Style class of the element.</td>
@@ -155,7 +139,25 @@ render() {
                             <td>checked</td>
                             <td>boolean</td>
                             <td>false</td>
-                            <td>Specifies whether a togglebutton should be checked or not.</td>
+                            <td>Specifies the on/off state of the button.</td>
+                        </tr>
+                        <tr>
+                            <td>tabIndex</td>
+                            <td>number</td>
+                            <td>0</td>
+                            <td>Index of the element in tabbing order.</td>
+                        </tr>
+                        <tr>
+                            <td>tooltip</td>
+                            <td>any</td>
+                            <td>null</td>
+                            <td>Content of the tooltip.</td>
+                        </tr>
+                        <tr>
+                            <td>tooltipOptions</td>
+                            <td>object</td>
+                            <td>null</td>
+                            <td>Configuration of the tooltip, refer to the tooltip documentation for more information.</td>
                         </tr>
                     </tbody>
                 </table>
@@ -174,9 +176,9 @@ render() {
                     <tbody>
                         <tr>
                             <td>onChange</td>
-                            <td>event.originalEvent: browser event <br />
-                                event.checked: boolean value to represent checked state.</td>
-                            <td>Callback to invoke on state change.</td>
+                            <td>event.originalEvent: Browser event <br />
+                                event.value: Value as the checked state.</td>
+                            <td>Callback to invoke on value change.</td>
                         </tr>
                     </tbody>
                 </table>
@@ -194,15 +196,15 @@ render() {
                     </thead>
                     <tbody>
                         <tr>
-                            <td>ui-togglebutton</td>
+                            <td>p-togglebutton</td>
                             <td>Container element</td>
                         </tr>
                         <tr>
-                            <td>ui-button-icon-left</td>
+                            <td>p-button-icon-left</td>
                             <td>Icon element.</td>
                         </tr>
                         <tr>
-                            <td>ui-button-text</td>
+                            <td>p-button-text</td>
                             <td>Label element.</td>
                         </tr>
                     </tbody>
@@ -214,29 +216,28 @@ render() {
         </TabPanel>
 
         <TabPanel header="Source">
+            <a href="https://github.com/primefaces/primereact/tree/master/src/showcase/togglebutton" className="btn-viewsource" target="_blank" rel="noopener noreferrer">
+                <span>View on GitHub</span>
+            </a>
 <CodeHighlight className="language-javascript">
 {`
+import React, {Component} from 'react';
+import {ToggleButton} from 'primereact/togglebutton';
+
 export class ToggleButtonDemo extends Component {
 
     constructor() {
         super();
-        this.state = {};
-        this.onChangeBasic = this.onChangeBasic.bind(this);
-        this.onChangeCustom = this.onChangeCustom.bind(this);
-    }
-
-    onChangeBasic(e) {
-        this.setState({checked1:e.value});
-    }
-
-    onChangeCustom(e) {
-        this.setState({checked2:e.value});
+        this.state = {
+            checked1: false,
+            checked2: false
+        };
     }
 
     render() {
         return (
             <div>
-                <div className="content-section">
+                <div className="content-section introduction">
                     <div className="feature-intro">
                         <h1>ToggleButton</h1>
                         <p>ToggleButton is used to select a boolean value using a button.</p>
@@ -245,16 +246,14 @@ export class ToggleButtonDemo extends Component {
 
                 <div className="content-section implementation">
                     <h3>Basic</h3>
-                    <ToggleButton style={{width:'150px'}} checked={this.state.checked1} onChange={this.onChangeBasic}/>
+                    <ToggleButton style={{width:'150px'}} checked={this.state.checked1} onChange={(e) => this.setState({checked1: e.value})} />
                     <p>Selected Value: {this.state.checked1 ? 'true' : 'false'}</p>
 
                     <h3>Custom</h3>
-                    <ToggleButton style={{width:'150px'}} onLabel="I confirm" offLabel="I reject" onIcon="fa-check-square" offIcon="fa-square"
-                                checked={this.state.checked2} onChange={this.onChangeCustom}/>
+                    <ToggleButton style={{width:'150px'}} onLabel="I confirm" offLabel="I reject" onIcon="pi pi-check" offIcon="pi pi-times"
+                                checked={this.state.checked2} onChange={(e) => this.setState({checked2: e.value})} />
                     <p>Selected Value: {this.state.checked2 ? 'true' : 'false'}</p>
                 </div>
-
-                <ToggleButtonDoc />
             </div>
         );
     }

@@ -1,26 +1,46 @@
 import React, {Component} from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
+import Tooltip from "../tooltip/Tooltip";
 
 export class RadioButton extends Component {
 
     static defaultProps = {
-        label: null,
+        id: null,
+        inputId: null,
+        name: null,
         value: null,
-        onChange: null,
-        checked: false
+        checked: false,
+        style: null,
+        className: null,
+        disabled: false,
+        required: false,
+        tooltip: null,
+        tooltipOptions: null,
+        onChange: null
     };
 
     static propTypes = {
-        label: PropTypes.string,
+        id: PropTypes.string,
+        inputId: PropTypes.string,
         value: PropTypes.any,
+        checked: PropTypes.bool,
+        style: PropTypes.object,
+        className: PropTypes.string,
+        disabled: PropTypes.bool,
+        required: PropTypes.bool,
         onChange: PropTypes.func,
-        checked: PropTypes.bool
+        tooltip: PropTypes.string,
+        tooltipOptions: PropTypes.object
     };
     
-    constructor() {
-        super();
+    constructor(props) {
+        super(props);
+        this.state = {};
+        
         this.onClick = this.onClick.bind(this);
+        this.onFocus = this.onFocus.bind(this);
+        this.onBlur = this.onBlur.bind(this);
     }
 
     select(e) {
@@ -29,31 +49,81 @@ export class RadioButton extends Component {
     }
 
     onClick(e) {
-        if(this.props.onChange) {
+        if(!this.props.disabled && this.props.onChange) {
             this.props.onChange({
                 originalEvent: e,
                 value: this.props.value,
-                checked: !this.props.checked
+                checked: !this.props.checked,
+                stopPropagation : () =>{},
+                preventDefault : () =>{},
+                target: {
+                    name: this.props.name,
+                    id: this.props.id,
+                    value:  this.props.value,
+                }
             });
+
+            this.input.checked = !this.props.checked;
+            this.input.focus();
         }
     }
 
+    onFocus() {
+        this.setState({focused: true});
+    }
+
+    onBlur() {
+        this.setState({focused: false});
+    }
+
+    componentDidMount() {
+        if (this.props.tooltip) {
+            this.renderTooltip();
+        }
+    }
+
+    componentDidUpdate(prevProps) {
+        if (this.props.tooltip && prevProps.tooltip !== this.props.tooltip) {
+            if (this.tooltip)
+                this.tooltip.updateContent(this.props.tooltip);
+            else
+                this.renderTooltip();
+        }
+    }
+
+    componentWillUnmount() {
+        if (this.tooltip) {
+            this.tooltip.destroy();
+            this.tooltip = null;
+        }
+    }
+
+    renderTooltip() {
+        this.tooltip = new Tooltip({
+            target: this.element,
+            content: this.props.tooltip,
+            options: this.props.tooltipOptions
+        });
+    }
+
     render() {
-        var boxClass = classNames('ui-radiobutton-box ui-widget ui-corner-all ui-state-default', {'ui-state-active':this.props.checked}),
-        iconClass = classNames('ui-radiobutton-icon ui-c', {'fa fa-circle': this.props.checked});
+        if(this.input) {
+            this.input.checked = this.props.checked;
+        }
+        
+        let containerClass = classNames('p-radiobutton p-component', this.props.className);
+        let boxClass = classNames('p-radiobutton-box p-component', {'p-highlight': this.props.checked, 'p-disabled': this.props.disabled, 'p-focus': this.state.focused});
+        let iconClass = classNames('p-radiobutton-icon p-c', { 'pi pi-circle-on': this.props.checked });
         
         return (
-            <div className={classNames('ui-radiobutton-container', this.props.className)}>
-                <div className='ui-radiobutton ui-widget'>
-                    <div className="ui-helper-hidden-accessible">
-                        <input ref={(el) => this.input = el} type="radio" />
-                    </div>
-                    <div className={boxClass}
-                        onClick={this.onClick}>
-                        <span className={iconClass}></span>
-                    </div>
+            <div ref={(el) => this.element = el} id={this.props.id} className={containerClass} style={this.props.style} onClick={this.onClick}>
+                <div className="p-hidden-accessible">
+                    <input id={this.props.inputId} ref={(el) => this.input = el} type="radio" name={this.props.name} defaultChecked={this.props.checked} 
+                        onFocus={this.onFocus} onBlur={this.onBlur} disabled={this.props.disabled} required={this.props.required}/>
                 </div>
-                {this.props.label && <label className="ui-radiobutton-label" onClick={this.select.bind(this)}>{this.props.label}</label>}
+                <div className={boxClass} ref={(el) => { this.box = el; }}>
+                    <span className={iconClass}></span>
+                </div>
             </div>
         )
     }

@@ -5,17 +5,19 @@ import PropTypes from 'prop-types';
 export class Captcha extends Component {
 
     static defaultProps = {
-        sitekey: null,
+        id: null,
+        siteKey: null,
         theme: "light",
         type: "image",
         size: "normal",
-        tabindex: 0,
+        tabIndex: 0,
         language: "en",
         onResponse: null,
         onExpire: null
     }
 
     static propTypes = {
+        id: PropTypes.string,
         sitekey: PropTypes.string,
         theme: PropTypes.string,
         type: PropTypes.string,
@@ -32,7 +34,7 @@ export class Captcha extends Component {
             'theme': this.props.theme,
             'type': this.props.type,
             'size': this.props.size,
-            'tabindex': this.props.tabindex,
+            'tabindex': this.props.tabIndex,
             'hl': this.props.language,
             'callback': (response) => {this.recaptchaCallback(response)},
             'expired-callback': () => {this.recaptchaExpiredCallback()}
@@ -67,7 +69,7 @@ export class Captcha extends Component {
         }
     }
     
-    componentWillMount() {
+    addRecaptchaScript() {
         this.recaptchaScript = null;
         if (!(window).grecaptcha) {
             var head = document.head || document.getElementsByTagName('head')[0];
@@ -80,6 +82,8 @@ export class Captcha extends Component {
     }
 
     componentDidMount() {
+        this.addRecaptchaScript();
+
         if ((window).grecaptcha) {
             this.init(); 
         }
@@ -101,6 +105,6 @@ export class Captcha extends Component {
     }
 
     render() {
-        return <div ref={(el) => this.targetEL = ReactDOM.findDOMNode(el)}></div>
+        return <div id={this.props.id} ref={(el) => this.targetEL = ReactDOM.findDOMNode(el)}></div>
     }
 }

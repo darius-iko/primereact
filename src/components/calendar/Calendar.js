@@ -1,317 +1,849 @@
 import React, { Component } from 'react';
-import PropTypes from 'prop-types';
 import ReactDOM from 'react-dom';
-import { InputText } from '../inputtext/InputText';
-import { Button } from '../button/Button';
+import PropTypes from 'prop-types';
+import {InputText} from '../inputtext/InputText';
+import {Button} from '../button/Button';
+import {CalendarPanel} from './CalendarPanel';
 import DomHandler from '../utils/DomHandler';
 import classNames from 'classnames';
+import Tooltip from "../tooltip/Tooltip";
 
 export class Calendar extends Component {
 
     static defaultProps = {
+        id: null,
+        name: null,
         value: null,
-        defaultDate: null,
+        viewDate: null,
         style: null,
-        styleClass: null,
-        inputStyle: null,
-        inputStyleClass: null,
-        placeholder: null,
-        disabled: false,
-        dateFormat: "mm/dd/yy",
+        className: null,
         inline: false,
-        showOtherMonths: true,
-        selectOtherMonths: false,
+        selectionMode: 'single',
+        inputId: null,
+        inputStyle: null,
+        inputClassName: null,
+        required: false,
+        readOnlyInput: false,
+        disabled: false,
+        tabIndex: null,
+        placeholder: null,
         showIcon: false,
-        icon: "fa-calendar",
-        appendTo: null,
-        readonlyInput: false,
-        shortYearCutoff: "+10",
-        minDate: null,
-        maxDate: null,
-        monthNavigator: false,
-        yearNavigator: false,
-        yearRange: null,
+        icon: 'pi pi-calendar',
+        showOnFocus: true,
+        numberOfMonths: 1,
+        view: 'date',
+        touchUI: false,
         showTime: false,
-        hourFormat: "24",
+        timeOnly: false,
+        showSeconds: false,
+        hourFormat: '24',
+        stepHour: 1,
+        stepMinute: 1,
+        stepSecond: 1,
+        shortYearCutoff: '+10',
+        hideOnDateTimeSelect: false,
+        showWeek: false,
         locale: {
             firstDayOfWeek: 0,
             dayNames: ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"],
             dayNamesShort: ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"],
             dayNamesMin: ["Su","Mo","Tu","We","Th","Fr","Sa"],
             monthNames: [ "January","February","March","April","May","June","July","August","September","October","November","December" ],
-            monthNamesShort: [ "Jan", "Feb", "Mar", "Apr", "May", "Jun","Jul", "Aug", "Sep", "Oct", "Nov", "Dec" ]
+            monthNamesShort: [ "Jan", "Feb", "Mar", "Apr", "May", "Jun","Jul", "Aug", "Sep", "Oct", "Nov", "Dec" ],
+            today: 'Today',
+            clear: 'Clear',
+            weekHeader: 'Wk'
         },
-        timeOnly: false,
-        stepHour: 1,
-        stepMinute: 1,
-        stepSecond: 1,
-        showSeconds: false,
-        dataType: "date",
-        required: false,
-        showOnFocus: true,
-        tabindex: null,
+        dateFormat: 'mm/dd/yy',
+        panelStyle: null,
+        panelClassName: null,
+        monthNavigator: false,
+        yearNavigator: false,
+        disabledDates: null,
+        disabledDays: null,
+        minDate: null,
+        maxDate: null,
+        maxDateCount: null,
+        showOtherMonths: true,
+        selectOtherMonths: false,
+        showButtonBar: false,
+        todayButtonClassName: 'p-button-secondary',
+        clearButtonStyleClass: 'p-button-secondary',
+        autoZIndex: true,
+        baseZIndex: 0,
+        appendTo: null,
+        tooltip: null,
+        tooltipOptions: null,
+        dateTemplate: null,
+        headerTemplate: null,
+        footerTemplate: null,
         onFocus: null,
-        onSelect: null,
         onBlur: null,
+        onInput: null,
+        onSelect: null,
+        onChange: null,
+        onViewDateChange: null,
+        onTodayButtonClick: null,
+        onClearButtonClick: null
     }
 
-    static propsTypes = {
+    static propTypes = {
+        id: PropTypes.string,
+        name: PropTypes.string,
         value: PropTypes.any,
-        defaultDate: PropTypes.instanceOf(Date),
-        style: PropTypes.string,
-        styleClass: PropTypes.string,
-        inputStyle: PropTypes.string,
-        inputStyleClass: PropTypes.string,
-        placeholder: PropTypes.string,
-        disabled: PropTypes.bool,
-        dateFormat: PropTypes.string,
+        viewDate: PropTypes.any,
+        style: PropTypes.object,
+        className: PropTypes.string,
         inline: PropTypes.bool,
-        showOtherMonths: PropTypes.bool,
-        selectOtherMonths: PropTypes.bool,
+        selectionMode: PropTypes.string,
+        inputId: PropTypes.string,
+        inputStyle: PropTypes.object,
+        inputClassName: PropTypes.string,
+        required: PropTypes.bool,
+        readOnlyInput: PropTypes.bool,
+        disabled: PropTypes.bool,
+        tabIndex: PropTypes.string,
+        placeholder: PropTypes.string,
         showIcon: PropTypes.bool,
         icon: PropTypes.string,
-        appendTo: PropTypes.string,
-        readonlyInput: PropTypes.bool,
-        shortYearCutoff: PropTypes.string,
-        minDate: PropTypes.instanceOf(Date),
-        maxDate: PropTypes.instanceOf(Date),
-        monthNavigator: PropTypes.bool,
-        yearNavigator: PropTypes.bool,
-        yearRange: PropTypes.string,
+        showOnFocus: PropTypes.bool,
+        numberOfMonths: PropTypes.number,
+        view: PropTypes.string,
+        touchUI: PropTypes.bool,
         showTime: PropTypes.bool,
-        hourFormat: PropTypes.string,
-        locale: PropTypes.object,
         timeOnly: PropTypes.bool,
+        showSeconds: PropTypes.bool,
+        hourFormat: PropTypes.string,
         stepHour: PropTypes.number,
         stepMinute: PropTypes.number,
         stepSecond: PropTypes.number,
-        showSeconds: PropTypes.bool,
-        dataType: PropTypes.string,
-        required: PropTypes.bool,
-        showOnFocus: PropTypes.bool,
-        tabindex: PropTypes.number,
+        shortYearCutoff: PropTypes.string,
+        hideOnDateTimeSelect: PropTypes.bool,
+        showWeek: PropTypes.bool,
+        locale: PropTypes.object,
+        dateFormat: PropTypes.string,
+        panelStyle: PropTypes.object,
+        panelClassName: PropTypes.string,
+        monthNavigator: PropTypes.bool,
+        yearNavigator: PropTypes.bool,
+        disabledDates: PropTypes.array,
+        disabledDays: PropTypes.array,
+        minDate: PropTypes.any,
+        maxDate: PropTypes.any,
+        maxDateCount: PropTypes.number,
+        showOtherMonths: PropTypes.bool,
+        selectOtherMonths: PropTypes.bool,
+        showButtonBar: PropTypes.bool,
+        todayButtonClassName: PropTypes.string,
+        clearButtonStyleClass: PropTypes.string,
+        autoZIndex: PropTypes.bool,
+        baseZIndex: PropTypes.number,
+        appendTo: PropTypes.any,
+        tooltip: PropTypes.string,
+        tooltipOptions: PropTypes.object,
+        dateTemplate: PropTypes.func,
+        headerTemplate: PropTypes.func,
+        footerTemplate: PropTypes.func,
         onFocus: PropTypes.func,
-        onSelect: PropTypes.func,
         onBlur: PropTypes.func,
+        onInput: PropTypes.func,
+        onSelect: PropTypes.func,
+        onChange: PropTypes.func,
+        onViewDateChange: PropTypes.func,
+        onTodayButtonClick: PropTypes.func,
+        onClearButtonClick: PropTypes.func,
     }
 
     constructor(props) {
         super(props);
-        this.state = {};
 
-        this.weekDays = [];
+        if (!this.props.onViewDateChange) {
+            let propValue = this.props.value;
+            if (Array.isArray(propValue)) {
+                propValue = propValue[0];
+            }
+
+            this.state = {
+                viewDate: (this.props.viewDate || propValue || new Date())
+            }
+        }
+
+        this.onInputChange = this.onInputChange.bind(this);
+        this.onInputFocus = this.onInputFocus.bind(this);
+        this.onInputBlur = this.onInputBlur.bind(this);
+        this.onInputKeyDown = this.onInputKeyDown.bind(this);
+        this.onButtonClick = this.onButtonClick.bind(this);
+        this.navBackward = this.navBackward.bind(this);
+        this.navForward = this.navForward.bind(this);
+        this.onMonthDropdownChange = this.onMonthDropdownChange.bind(this);
+        this.onYearDropdownChange = this.onYearDropdownChange.bind(this);
+        this.onTodayButtonClick = this.onTodayButtonClick.bind(this);
+        this.onClearButtonClick = this.onClearButtonClick.bind(this);
+        this.incrementHour = this.incrementHour.bind(this);
+        this.decrementHour = this.decrementHour.bind(this);
+        this.incrementMinute = this.incrementMinute.bind(this);
+        this.decrementMinute = this.decrementMinute.bind(this);
+        this.incrementSecond = this.incrementSecond.bind(this);
+        this.decrementSecond= this.decrementSecond.bind(this);
+        this.toggleAmPm = this.toggleAmPm.bind(this);
     }
 
-    get minDate() {
-        return this._minDate;
-    }
-    
-    set minDate(date) {
-        this._minDate = date;
-        this.createMonth(this.currentMonth, this.currentYear);
-    }
-    
-    get maxDate() {
-        return this._maxDate;
-    }
-    
-    set maxDate(date) {
-        this._maxDate = date;
-        this.createMonth(this.currentMonth, this.currentYear);
+    componentDidMount() {
+        if (this.props.tooltip) {
+            this.renderTooltip();
+        }
     }
 
-    createMonth(month, year) {
-        this.dates = [];
-        this.currentMonth = month;
-        this.currentYear = year;
-        this.currentMonthText = this.props.locale.monthNames[month];
-        let firstDay = this.getFirstDayOfMonthIndex(month, year);
-        let daysLength = this.getDaysCountInMonth(month, year);
-        let prevMonthDaysLength = this.getDaysCountInPrevMonth(month, year);
-        let dayNo = 1;
-        let today = new Date();
-                
-        for(let i = 0; i < 6; i++) {
-            let week = [];
-            
-            if(i === 0) {
-                for(let j = (prevMonthDaysLength - firstDay + 1); j <= prevMonthDaysLength; j++) {
-                    let prev = this.getPreviousMonthAndYear(month, year);
-                    week.push({day: j, month: prev.month, year: prev.year, otherMonth: true, 
-                            today: this.isToday(today, j, prev.month, prev.year), selectable: this.isSelectable(j, prev.month, prev.year)});
-                }
-                
-                let remainingDaysLength = 7 - week.length;
-                for(let j = 0; j < remainingDaysLength; j++) {
-                    week.push({day: dayNo, month: month, year: year, today: this.isToday(today, dayNo, month, year),
-                            selectable: this.isSelectable(dayNo, month, year)});
-                    dayNo++;
-                }
+    componentDidUpdate(prevProps) {
+        if (this.props.tooltip && prevProps.tooltip !== this.props.tooltip) {
+            if (this.tooltip)
+                this.tooltip.updateContent(this.props.tooltip);
+            else
+                this.renderTooltip();
+        }
+    }
+
+    componentWillUnmount() {
+        if (this.hideTimeout) {
+            clearTimeout(this.hideTimeout);
+        }
+        if (this.mask) {
+            this.disableModality();
+            this.mask = null;
+        }
+
+        if (this.tooltip) {
+            this.tooltip.destroy();
+            this.tooltip = null;
+        }
+
+        this.unbindDocumentClickListener();
+        this.unbindDocumentResizeListener();
+    }
+
+    renderTooltip() {
+        this.tooltip = new Tooltip({
+            target: this.inputElement,
+            content: this.props.tooltip,
+            options: this.props.tooltipOptions
+        });
+    }
+
+    onInputFocus(event) {
+        if (this.props.showOnFocus && !this.panel.offsetParent) {
+            this.showOverlay();
+        }
+
+        if (this.props.onFocus) {
+            this.props.onFocus(event);
+        }
+
+        DomHandler.addClass(this.container, 'p-inputwrapper-focus');
+    }
+
+    onInputBlur(event) {
+        if (this.props.onBlur) {
+            this.props.onBlur(event);
+        }
+
+        DomHandler.removeClass(this.container, 'p-inputwrapper-focus');
+    }
+
+    onInputKeyDown(event) {
+        this.isKeydown = true;
+        if (event.keyCode === 9) {
+            this.hideOverlay();
+        }
+    }
+
+    onInputChange(event) {
+        // IE 11 Workaround for input placeholder
+        if (!this.isKeydown) {
+            return;
+        }
+        this.isKeydown = false;
+        
+        let rawValue = event.target.value;
+
+        try {
+            let value = this.parseValueFromString(rawValue);
+            this.updateModel(event, value);
+            this.updateViewDate(event, value.length ? value[0] : value);
+        }
+        catch(err) {
+            this.updateModel(event, rawValue);
+        }
+        
+        if (this.props.onInput) {
+            this.props.onInput(event);
+        }
+    }
+
+    onButtonClick(event) {
+        if (!this.panel.offsetParent) {
+            this.showOverlay();
+        }
+    }
+
+    navBackward(event) {
+        if(this.props.disabled) {
+            event.preventDefault();
+            return;
+        }
+
+        let newViewDate = new Date(this.getViewDate().getTime());
+
+        if (this.props.view === 'date') {
+            if(newViewDate.getMonth() === 0) {
+                newViewDate.setMonth(11);
+                newViewDate.setFullYear(newViewDate.getFullYear() - 1);
             }
             else {
-                for (let j = 0; j < 7; j++) {
-                    if(dayNo > daysLength) {
-                        let next = this.getNextMonthAndYear(month, year);
-                        week.push({day: dayNo - daysLength, month: next.month, year: next.year, otherMonth:true, 
-                                    today: this.isToday(today, dayNo - daysLength, next.month, next.year),
-                                    selectable: this.isSelectable((dayNo - daysLength), next.month, next.year)});
-                    }
-                    else {
-                        week.push({day: dayNo, month: month, year: year, today: this.isToday(today, dayNo, month, year),
-                             selectable: this.isSelectable(dayNo, month, year)});
-                    }
-                    
-                    dayNo++;
+                newViewDate.setMonth(newViewDate.getMonth() - 1);
+            }
+        }
+        else if (this.props.view === 'month') {
+            let currentYear = newViewDate.getFullYear();
+            let newYear = currentYear - 1;
+
+            if(this.props.yearNavigator) {
+                const minYear = parseInt(this.props.yearRange.split(':')[0], 10);
+
+                if(newYear < minYear) {
+                    newYear = minYear;
                 }
             }
-            
-            this.dates.push(week);
+
+            newViewDate.setFullYear(newYear);
         }
-        this.setState({dates: this.dates, currentMonth: this.currentMonth, currentYear: this.currentYear, currentMonthText: this.currentMonthText})
-        if(this.selectedLinkItem) {
-            DomHandler.removeClass(this.selectedLinkItem, 'ui-state-active');
-            DomHandler.removeClass(this.selectedLinkItem.parentElement, 'ui-datepicker-current-day');
-        }
-    }
-    
-    prevMonth(event) {
+
+        this.updateViewDate(event, newViewDate);
+ 
+        event.preventDefault();
+    } 
+
+    navForward(event) {
         if(this.props.disabled) {
             event.preventDefault();
             return;
         }
-        
-        if(this.currentMonth === 0) {
-            this.currentMonth = 11;
-            this.currentYear--;
+
+        let newViewDate = new Date(this.getViewDate().getTime());
+
+        if (this.props.view === 'date') {
+            if(newViewDate.getMonth() === 11) {
+                newViewDate.setMonth(0);
+                newViewDate.setFullYear(newViewDate.getFullYear() + 1);
+            }
+            else {
+                newViewDate.setMonth(newViewDate.getMonth() + 1);
+            }
         }
-        else {
-            this.currentMonth--;
+        else if (this.props.view === 'month') {
+            let currentYear = newViewDate.getFullYear();
+            let newYear = currentYear + 1;
+
+            if(this.props.yearNavigator) {
+                const maxYear = parseInt(this.props.yearRange.split(':')[1], 10);
+
+                if(newYear > maxYear) {
+                    newYear = maxYear;
+                }
+            }
+
+            newViewDate.setFullYear(newYear);
         }
+
+        this.updateViewDate(event, newViewDate);
+
+        event.preventDefault();
+    }
+
+    onMonthDropdownChange(event) {
+        const currentViewDate = this.props.onViewDateChange ? this.props.viewDate : this.state.viewDate;
+        let newViewDate = new Date(currentViewDate.getTime());
+        newViewDate.setMonth(parseInt(event.target.value, 10));
+
+        this.updateViewDate(event, newViewDate);
+    }
+
+    onYearDropdownChange(event) {
+        const currentViewDate = this.props.onViewDateChange ? this.props.viewDate : this.state.viewDate;
+        let newViewDate = new Date(currentViewDate.getTime());
+        newViewDate.setFullYear(parseInt(event.target.value, 10));
+
+        this.updateViewDate(event, newViewDate);
+    }
+
+    onTodayButtonClick(event) {
+        const today = new Date();
+        const dateMeta = {day: today.getDate(), month: today.getMonth(), year: today.getFullYear(), today: true, selectable: true};
+
+        this.updateViewDate(event, today);
+        this.onDateSelect(event, dateMeta);
         
-        this.createMonth(this.currentMonth, this.currentYear);
+        if (this.props.onTodayButtonClick) {
+            this.props.onTodayButtonClick(event);
+        }
+    }
+
+    onClearButtonClick(event) {
+        this.updateModel(event, null);
+
+        if (this.props.onClearButtonClick) {
+            this.props.onClearButtonClick(event);
+        }
+    }
+
+    incrementHour(event) {
+        const currentTime = (this.props.value && this.props.value instanceof Date) ? this.props.value : this.getViewDate();
+        const currentHour = currentTime.getHours();
+        let newHour = currentHour + this.props.stepHour;
+        newHour = (newHour >= 24) ? (newHour - 24) : newHour;
+
+        if (this.validateHour(newHour, currentTime)) {
+            this.updateTime(event, newHour, currentTime.getMinutes(), currentTime.getSeconds());
+        }
+
         event.preventDefault();
     }
     
-    nextMonth(event) {
-        if(this.props.disabled) {
-            event.preventDefault();
-            return;
+    decrementHour(event) {
+        const currentTime = (this.props.value && this.props.value instanceof Date) ? this.props.value : this.getViewDate();
+        const currentHour = currentTime.getHours();
+        let newHour = currentHour - this.props.stepHour;
+        newHour = (newHour < 0) ? (newHour + 24) : newHour;
+
+        if (this.validateHour(newHour, currentTime)) {
+            this.updateTime(event, newHour, currentTime.getMinutes(), currentTime.getSeconds());
         }
-        
-        if(this.currentMonth === 11) {
-            this.currentMonth = 0;
-            this.currentYear++;
-        }
-        else {
-            this.currentMonth++;
-        }
-        
-        this.createMonth(this.currentMonth, this.currentYear);
+
         event.preventDefault();
     }
-    
-    onDateSelect(event,dateMeta) {
+
+    incrementMinute(event) {
+        const currentTime = (this.props.value && this.props.value instanceof Date) ? this.props.value : this.getViewDate();
+        const currentMinute = currentTime.getMinutes();
+        let newMinute = currentMinute + this.props.stepMinute;
+        newMinute = (newMinute > 59) ? (newMinute - 60) : newMinute;
+
+        if (this.validateMinute(newMinute, currentTime)) {
+            this.updateTime(event, currentTime.getHours(), newMinute, currentTime.getSeconds());
+        }
+
+        event.preventDefault();
+    }
+
+    decrementMinute(event) {
+        const currentTime = (this.props.value && this.props.value instanceof Date) ? this.props.value : this.getViewDate();
+        const currentMinute = currentTime.getMinutes();
+        let newMinute = currentMinute - this.props.stepMinute;
+        newMinute = (newMinute < 0) ? (newMinute + 60) : newMinute;
+
+        if (this.validateMinute(newMinute, currentTime)) {
+            this.updateTime(event, currentTime.getHours(), newMinute, currentTime.getSeconds());
+        }
+
+        event.preventDefault();
+    }
+
+    incrementSecond(event) {
+        const currentTime = (this.props.value && this.props.value instanceof Date) ? this.props.value : this.getViewDate();
+        const currentSecond = currentTime.getSeconds();
+        let newSecond = currentSecond + this.props.stepSecond;
+        newSecond = (newSecond > 59) ? (newSecond - 60) : newSecond;
+
+        if (this.validateSecond(newSecond, currentTime)) {
+            this.updateTime(event, currentTime.getHours(), currentTime.getMinutes(), newSecond);
+        }
+
+        event.preventDefault();
+    }
+
+    decrementSecond(event) {
+        const currentTime = (this.props.value && this.props.value instanceof Date) ? this.props.value : this.getViewDate();
+        const currentSecond = currentTime.getSeconds();
+        let newSecond = currentSecond - this.props.stepSecond;
+        newSecond = (newSecond < 0) ? (newSecond + 60) : newSecond;
+
+        if (this.validateSecond(newSecond, currentTime)) {
+            this.updateTime(event, currentTime.getHours(), currentTime.getMinutes(), newSecond);
+        }
+
+        event.preventDefault();
+    }
+
+    toggleAmPm(event) {
+        const currentTime = (this.props.value && this.props.value instanceof Date) ? this.props.value : this.getViewDate();
+        const currentHour = currentTime.getHours();
+        const newHour = (currentHour >= 12) ? currentHour - 12: currentHour + 12;
+
+        this.updateTime(event, newHour, currentTime.getMinutes(), currentTime.getSeconds());
+        event.preventDefault();
+    }
+
+    getViewDate() {
+        return this.props.onViewDateChange ? this.props.viewDate: this.state.viewDate;
+    }
+
+    validateHour(hour, value) {
+        let valid = true;
+        let valueDateString = value ? value.toDateString() : null;
+        
+        if(this.props.minDate && valueDateString && this.props.minDate.toDateString() === valueDateString) {
+            if(this.props.minDate.getHours() > hour) {
+                valid = false;
+            }
+        }
+        
+        if(this.props.maxDate && valueDateString && this.props.maxDate.toDateString() === valueDateString) {
+            if(this.props.maxDate.getHours() < hour) {
+                valid = false;
+            }
+        }
+        
+        return valid;
+    }
+
+    validateMinute(minute, value) {
+        let valid = true;
+        let valueDateString = value ? value.toDateString() : null;
+
+        if(this.props.minDate && valueDateString && this.props.minDate.toDateString() === valueDateString) {
+            if(value.getHours() === this.props.minDate.getHours()){
+                if(this.props.minDate.getMinutes() > minute) {
+                    valid = false;
+                }
+            }
+        }
+        
+        if(this.props.maxDate && valueDateString && this.props.maxDate.toDateString() === valueDateString) {
+            if(value.getHours() === this.props.maxDate.getHours()){
+                if(this.props.maxDate.getMinutes() < minute) {
+                    valid = false;
+                }
+            }
+        }
+        
+        return valid;
+    }
+
+    validateSecond(second, value) {
+        let valid = true;
+        let valueDateString = value ? value.toDateString() : null;
+
+        if(this.props.minDate && valueDateString && this.props.minDate.toDateString() === valueDateString) {
+            if(value.getHours() === this.props.minDate.getHours() && value.getMinutes() === this.props.minDate.getMinutes()) {
+                if(this.props.minDate.getMinutes() > second) {
+                    valid = false;
+                }
+            }
+        }
+        
+        if(this.props.maxDate && valueDateString && this.props.maxDate.toDateString() === valueDateString) {
+            if(value.getHours() === this.props.maxDate.getHours() && value.getMinutes() === this.props.maxDate.getMinutes()){
+                if(this.props.maxDate.getMinutes() < second) {
+                    valid = false;
+                }
+            }
+        }
+        
+        return valid;
+    }
+
+    updateTime(event, hour, minute, second) {
+        let newDateTime = (this.props.value && this.props.value instanceof Date) ? new Date(this.props.value) : new Date();
+        
+        newDateTime.setHours(hour);
+        newDateTime.setMinutes(minute);
+        newDateTime.setSeconds(second);
+
+        this.updateModel(event, newDateTime);
+
+        if (this.props.onSelect) {
+            this.props.onSelect({
+                originalEvent: event,
+                value: newDateTime
+            });
+        }
+    }
+
+    updateViewDate(event, value) {
+        if (this.props.yearNavigator) {
+            let viewYear = value.getFullYear();
+
+            if (this.props.minDate && this.props.minDate.getFullYear() > viewYear) {
+                viewYear = this.props.minDate.getFullYear();
+            }
+            if (this.props.maxDate && this.props.maxDate.getFullYear() < viewYear) {
+                viewYear = this.props.maxDate.getFullYear();
+            }
+
+            value.setFullYear(viewYear);
+        }
+
+        if (this.props.monthNavigator && this.props.view !== 'month') {
+            let viewMonth = value.getMonth();
+            let viewMonthWithMinMax = parseInt((this.isInMinYear(value) && Math.max(this.props.minDate.getMonth(), viewMonth).toString()) || (this.isInMaxYear(value) && Math.min(this.props.maxDate.getMonth(), viewMonth).toString()) || viewMonth);
+
+            value.setMonth(viewMonthWithMinMax);
+        }
+
+        if (this.props.onViewDateChange) {
+            this.props.onViewDateChange({
+                originalEvent: event,
+                value: value
+            });
+        }
+        else {
+            this.setState({
+                viewDate: value
+            });
+        }
+    }
+
+    onDateSelect(event, dateMeta) {
         if(this.props.disabled || !dateMeta.selectable) {
             event.preventDefault();
             return;
         }
-        
-        if(dateMeta.otherMonth) {
-            if(this.props.selectOtherMonths)
-                this.selectDate(event,dateMeta);
+
+        if (this.isMultipleSelection()) {
+            if (this.isSelected(dateMeta)) {
+                let value = this.props.value.filter((date, i) => {
+                    return !this.isDateEquals(date, dateMeta);
+                });
+                this.updateModel(event, value);
+            }
+            else if(!this.props.maxDateCount || !this.props.value || this.props.maxDateCount > this.props.value.length) {
+                this.selectDate(event, dateMeta);       
+            }
         }
         else {
-             this.selectDate(event,dateMeta);
+            this.selectDate(event, dateMeta);       
         }
         
-        this.dateClick = true;
-        this.updateInputfield();
+        if(!this.props.inline && this.isSingleSelection() && (!this.props.showTime || this.props.hideOnDateTimeSelect)) {
+            setTimeout(() => {
+                this.hideOverlay();
+            }, 100);
+
+            if(this.mask) {
+                this.disableModality();
+            }
+        }
+
         event.preventDefault();
     }
-    
-    updateInputfield() {
-        if(this.value) {
-            let formattedValue;
-            
-            if(this.props.timeOnly) {
-                formattedValue = this.formatTime(this.value);
+
+    selectDate(event, dateMeta) {
+        let date = new Date(dateMeta.year, dateMeta.month, dateMeta.day);
+        
+        if(this.props.showTime) {
+            let time = (this.props.value && this.props.value instanceof Date) ? this.props.value : new Date();
+            date.setHours(time.getHours());
+            date.setMinutes(time.getMinutes());
+            date.setSeconds(time.getSeconds());
+        }
+        
+        if(this.props.minDate && this.props.minDate > date) {
+            date = this.minDate;
+        }
+        
+        if(this.maxDate && this.maxDate < date) {
+            date = this.maxDate;
+        }
+        
+        if (this.isSingleSelection()) {
+            this.updateModel(event, date);
+        }
+        else if(this.isMultipleSelection()) {
+            this.updateModel(event, this.props.value ? [...this.props.value, date] : [date]);
+        }
+        else if (this.isRangeSelection()) {
+            if (this.props.value && this.props.value.length) {
+                let startDate = this.props.value[0];
+                let endDate = this.props.value[1];
+                
+                if (!endDate && date.getTime() >= startDate.getTime()) {
+                    endDate = date;
+                }
+                else {
+                    startDate = date;
+                    endDate = null;
+                }
+                
+                this.updateModel(event, [startDate, endDate]);
             }
             else {
-                formattedValue = this.formatDate(this.value, this.props.dateFormat);
-                if(this.props.showTime) {
-                    formattedValue += ' ' + this.formatTime(this.value);
-                }
+                this.updateModel(event, [date, null]);
             }
-            
-            this.inputFieldValue = formattedValue;
         }
-        else {
-            this.inputFieldValue = '';
-        }
-
-        if(!this.props.inline) {
-            this.inputfield.value = this.inputFieldValue;
-        }
-
-        this.updateFilledState();
-    }
-    
-    selectDate(event, dateMeta) {
-        if(this.selectedLinkItem) {
-            DomHandler.removeClass(this.selectedLinkItem, 'ui-state-active');
-            DomHandler.removeClass(this.selectedLinkItem.parentElement, 'ui-datepicker-current-day');
-        }
-
-        this.value = new Date(dateMeta.year, dateMeta.month, dateMeta.day);
-        if(this.props.showTime) {
-            if(this.props.hourFormat === '12' && this.pm && this.currentHour !== 12)
-                this.value.setHours(this.currentHour + 12);
-            else
-                this.value.setHours(this.currentHour);
-
-            this.value.setMinutes(this.currentMinute);
-            this.value.setSeconds(this.currentSecond);
-        }
-
-        DomHandler.addClass(event.target, 'ui-state-active');
-        DomHandler.addClass(event.target.parentElement, 'ui-datepicker-current-day');
-        this.selectedLinkItem = event.target;
-
-        this._isValid = true;
-        this.updateModel(event);
+        
         if (this.props.onSelect) {
             this.props.onSelect({
                 originalEvent: event,
-                value: this.value
-            })
+                value: date
+            });
+        }
+    }
+
+    onMonthSelect(event, month) {
+        this.onDateSelect(event, {year: this.getViewDate().getFullYear(), month: month, day: 1, selectable: true});
+        event.preventDefault();
+    }
+    
+    updateModel(event, value) {   
+        if (this.props.onChange) {
+            this.props.onChange({
+                originalEvent: event,
+                value: value,
+                stopPropagation : () =>{},
+                preventDefault : () =>{},
+                target: {
+                    name: this.props.name,
+                    id: this.props.id,
+                    value: value
+                }
+            });
+        }
+    }
+
+    showOverlay() {
+        if (this.props.autoZIndex) {
+            this.panel.style.zIndex = String(this.props.baseZIndex + DomHandler.generateZIndex());
+        }        
+        this.panel.style.display = 'block';
+
+        setTimeout(() => {
+            DomHandler.addClass(this.panel, 'p-input-overlay-visible');
+            DomHandler.removeClass(this.panel, 'p-input-overlay-hidden');
+        }, 1);
+        
+        this.alignPanel();
+        this.bindDocumentClickListener();
+        this.bindDocumentResizeListener();
+    }
+
+    hideOverlay() {
+        if (this.panel) {
+            DomHandler.addClass(this.panel, 'p-input-overlay-hidden');
+            DomHandler.removeClass(this.panel, 'p-input-overlay-visible');
+            this.unbindDocumentClickListener();
+            this.unbindDocumentResizeListener();
+
+            this.hideTimeout = setTimeout(() => {
+                this.panel.style.display = 'none';
+                DomHandler.removeClass(this.panel, 'p-input-overlay-hidden');
+            }, 150);
+        }
+    }
+
+    bindDocumentClickListener() {
+        if (!this.documentClickListener) {
+            this.documentClickListener = (event) => {
+                if (this.isOutsideClicked(event)) {
+                    this.hideOverlay();
+                }
+            };
+
+            document.addEventListener('click', this.documentClickListener);
         }
     }
     
-    updateModel(event) {
-        if(this.props.onChange) {
-            if(this.props.dataType === 'date') {
-                this.props.onChange({
-                    originalEvent: event,
-                    value: this.value
-                })
-            }
-            else if(this.props.dataType === 'string') {
-                if(this.timeOnly) {
-                    this.props.onChange({
-                        originalEvent: event,
-                        value: this.formatDate(this.value)
-                    })
-                }
-                else {
-                    this.props.onChange({
-                        originalEvent: event,
-                        value: this.formatDate(this.value, this.props.dateFormat)
-                    })
-                }
-            }
+    unbindDocumentClickListener() {
+        if (this.documentClickListener) {
+            document.removeEventListener('click', this.documentClickListener);
+            this.documentClickListener = null;
+        }
+    }
+
+    bindDocumentResizeListener() {
+        if (!this.documentResizeListener && !this.props.touchUI) {
+            this.documentResizeListener = this.onWindowResize.bind(this);
+            window.addEventListener('resize', this.documentResizeListener);
         }
     }
     
+    unbindDocumentResizeListener() {
+        if (this.documentResizeListener) {
+            window.removeEventListener('resize', this.documentResizeListener);
+            this.documentResizeListener = null;
+        }
+    }
+
+    isOutsideClicked(event) {
+        return this.container && !(this.container.isSameNode(event.target) || this.isNavIconClicked(event) || 
+                this.container.contains(event.target) || (this.panel && this.panel.contains(event.target)));
+    }
+    
+    isNavIconClicked(event) {
+        return (DomHandler.hasClass(event.target, 'p-datepicker-prev') || DomHandler.hasClass(event.target, 'p-datepicker-prev-icon')
+                || DomHandler.hasClass(event.target, 'p-datepicker-next') || DomHandler.hasClass(event.target, 'p-datepicker-next-icon'));
+    }
+
+    onWindowResize() {
+        if (this.panel.offsetParent && !DomHandler.isAndroid()) {
+            this.hideOverlay();
+        }
+    }
+    
+    alignPanel() {
+        if (this.props.touchUI) {
+            this.enableModality();
+        }
+        else {
+            if(this.props.appendTo) {
+                DomHandler.absolutePosition(this.panel, this.inputElement);
+                this.panel.style.minWidth = DomHandler.getWidth(this.container) + 'px';
+            }
+            else {
+                DomHandler.relativePosition(this.panel, this.inputElement);
+            }   
+        }
+    }
+
+    enableModality() {
+        if (!this.mask) {
+            this.mask = document.createElement('div');
+            this.mask.style.zIndex = String(parseInt(this.panel.style.zIndex, 10) - 1);
+            DomHandler.addMultipleClasses(this.mask, 'p-component-overlay p-datepicker-mask p-datepicker-mask-scrollblocker');
+            
+            this.maskClickListener = () => {
+                this.disableModality();
+            };
+            this.mask.addEventListener('click', this.maskClickListener);
+
+            document.body.appendChild(this.mask);
+            DomHandler.addClass(document.body, 'p-overflow-hidden');
+        }
+    }
+    
+    disableModality() {
+        if (this.mask) {
+            this.mask.removeEventListener('click', this.maskClickListener);
+            this.maskClickListener = null;         
+            document.body.removeChild(this.mask);
+            this.mask = null;   
+
+            let bodyChildren = document.body.children;
+            let hasBlockerMasks;
+            for (let i = 0; i < bodyChildren.length; i++) {
+                let bodyChild = bodyChildren[i];
+                if(DomHandler.hasClass(bodyChild, 'p-datepicker-mask-scrollblocker')) {
+                    hasBlockerMasks = true;
+                    break;
+                }
+            }
+            
+            if (!hasBlockerMasks) {
+                DomHandler.removeClass(document.body, 'p-overflow-hidden');
+            }
+
+            this.hideOverlay();
+        }
+    }
+
     getFirstDayOfMonthIndex(month, year) {
         let day = new Date();
         day.setDate(1);
@@ -330,6 +862,16 @@ export class Calendar extends Component {
         let prev = this.getPreviousMonthAndYear(month, year);
         return this.getDaysCountInMonth(prev.month, prev.year);
     }
+
+    daylightSavingAdjust(date) {
+        if (!date) {
+            return null;
+        }
+
+        date.setHours(date.getHours() > 12 ? date.getHours() + 2 : 0);
+        
+        return date;
+    }
     
     getPreviousMonthAndYear(month, year) {
         let m, y;
@@ -343,7 +885,7 @@ export class Calendar extends Component {
             y = year;
         }
         
-        return {'month':m,'year':y};
+        return {'month':m, 'year':y};
     }
     
     getNextMonthAndYear(month, year) {
@@ -355,6 +897,7 @@ export class Calendar extends Component {
         }
         else {
             m = month + 1;
+            y = year;
         }
         
         return {'month':m,'year':y};
@@ -363,23 +906,110 @@ export class Calendar extends Component {
     getSundayIndex() {
         return this.props.locale.firstDayOfWeek > 0 ? 7 - this.props.locale.firstDayOfWeek : 0;
     }
-    
-    isSelected(dateMeta) {     
-        if(this.value)
-            return this.value.getDate() === dateMeta.day && this.value.getMonth() === dateMeta.month && this.value.getFullYear() === dateMeta.year;
-        else
-            return false;
+
+    createWeekDays() {
+        let weekDays = [];
+        let dayIndex = this.props.locale.firstDayOfWeek;
+        for(let i = 0; i < 7; i++) {
+            weekDays.push(this.props.locale.dayNamesMin[dayIndex]);
+            dayIndex = (dayIndex === 6) ? 0 : ++dayIndex;
+        }
+
+        return weekDays;
     }
-    
-    isToday(today, day, month, year) {     
-        return today.getDate() === day && today.getMonth() === month && today.getFullYear() === year;
+
+    createMonths(month, year) {
+        let months = [];
+        for (let i = 0 ; i < this.props.numberOfMonths; i++) {
+            let m = month + i;
+            let y = year;
+            if (m > 11) {
+                m = m % 11 - 1;
+                y = year + 1;
+            }
+
+            months.push(this.createMonth(m, y));
+        }
+
+        return months;
     }
-    
-    isSelectable(day, month, year) {
+
+    createMonth(month, year) {
+        let dates = [];
+        let firstDay = this.getFirstDayOfMonthIndex(month, year);
+        let daysLength = this.getDaysCountInMonth(month, year);
+        let prevMonthDaysLength = this.getDaysCountInPrevMonth(month, year);
+        let dayNo = 1;
+        let today = new Date();
+        let weekNumbers = [];
+        let monthRows = Math.ceil((daysLength + firstDay) / 7);
+        
+        for(let i = 0; i < monthRows; i++) {
+            let week = [];
+            
+            if(i === 0) {
+                for(let j = (prevMonthDaysLength - firstDay + 1); j <= prevMonthDaysLength; j++) {
+                    let prev = this.getPreviousMonthAndYear(month, year);
+                    week.push({day: j, month: prev.month, year: prev.year, otherMonth: true,
+                            today: this.isToday(today, j, prev.month, prev.year), selectable: this.isSelectable(j, prev.month, prev.year, true)});
+                }
+                
+                let remainingDaysLength = 7 - week.length;
+                for(let j = 0; j < remainingDaysLength; j++) {
+                    week.push({day: dayNo, month: month, year: year, today: this.isToday(today, dayNo, month, year),
+                            selectable: this.isSelectable(dayNo, month, year, false)});
+                    dayNo++;
+                }
+            }
+            else {
+                for (let j = 0; j < 7; j++) {
+                    if(dayNo > daysLength) {
+                        let next = this.getNextMonthAndYear(month, year);
+                        week.push({day: dayNo - daysLength, month: next.month, year: next.year, otherMonth:true,
+                                    today: this.isToday(today, dayNo - daysLength, next.month, next.year),
+                                    selectable: this.isSelectable((dayNo - daysLength), next.month, next.year, true)});
+                    }
+                    else {
+                        week.push({day: dayNo, month: month, year: year, today: this.isToday(today, dayNo, month, year),
+                            selectable: this.isSelectable(dayNo, month, year, false)});
+                    }
+                    
+                    dayNo++;
+                }
+            }
+
+            if (this.props.showWeek) {
+                weekNumbers.push(this.getWeekNumber(new Date(week[0].year, week[0].month, week[0].day))); 
+            }
+            
+            dates.push(week);
+        }
+  
+        return {
+            month: month,
+            year: year,
+            dates: dates,
+            weekNumbers: weekNumbers
+        };
+    }
+
+    getWeekNumber(date) {
+        let checkDate = new Date(date.getTime());
+		checkDate.setDate(checkDate.getDate() + 4 - ( checkDate.getDay() || 7 ));
+		let time = checkDate.getTime();
+		checkDate.setMonth( 0 );
+		checkDate.setDate( 1 );
+		return Math.floor( Math.round((time - checkDate.getTime()) / 86400000 ) / 7 ) + 1;
+    }
+
+    isSelectable(day, month, year, otherMonth) {
         let validMin = true;
         let validMax = true;
+        let validDate = true;
+        let validDay = true;
+        let validMonth = true;
         
-        if(this.props.minDate) {
+        if (this.props.minDate) {
              if(this.props.minDate.getFullYear() > year) {
                  validMin = false;
              }
@@ -392,10 +1022,10 @@ export class Calendar extends Component {
                          validMin = false;
                      }
                  }
-             }  
+             }
         }
         
-        if(this.props.maxDate) {
+        if (this.props.maxDate) {
              if(this.props.maxDate.getFullYear() < year) {
                  validMax = false;
              }
@@ -408,328 +1038,246 @@ export class Calendar extends Component {
                          validMax = false;
                      }
                  }
-             }  
+             }
         }
         
-        return validMin && validMax;
-    }
-    
-    onInputFocus(inputfield, event) {
-        this.focus = true;
-        if(this.props.showOnFocus) {
-            this.showOverlay(inputfield);
+        if (this.props.disabledDates) {
+           validDate = !this.isDateDisabled(day, month, year);
+        }
+       
+        if (this.props.disabledDays) {
+           validDay = !this.isDayDisabled(day, month, year)
         }
 
-        if (this.props.onFocus) {
-            this.props.onFocus({
-                originalEvent: event
-            })
+        if (this.props.selectOtherMonths === false && otherMonth) {
+            validMonth = false;
         }
-    }
-    
-    onInputBlur(event) {
-        this.focus = false;
-        if (this.props.onBlur) {
-            this.props.onBlur({
-                originalEvent: event
-            })
-        }
-    }
-    
-    onButtonClick(event,inputfield) {
-        this.closeOverlay = false;
         
-        if(!this.overlay.offsetParent) {
-            inputfield.focus();
-            this.showOverlay(inputfield);
-        }
-        else
-            this.closeOverlay = true;
+        return validMin && validMax && validDate && validDay && validMonth;
     }
 
-    onInputClick(event) {
-        this.closeOverlay = false;
-    }
-    
-    onInputKeydown(event) {
-        if(event.keyCode === 9) {
-            this.overlayVisible = false;
-            this.overlay.style.display = 'none';
-        }
-    }
-    
-    onMonthDropdownChange(m) {
-        this.currentMonth = parseInt(m,10);
-        this.createMonth(this.currentMonth, this.currentYear);
-    }
-    
-    onYearDropdownChange(y) {
-        this.currentYear = parseInt(y,10);
-        this.createMonth(this.currentMonth, this.currentYear);
-    }
-    
-    incrementHour(event) {
-        let newHour = this.currentHour + this.props.stepHour;
-        if(this.props.hourFormat === '24')
-            this.currentHour = (newHour >= 24) ? (newHour - 24) : newHour;        
-        else if(this.props.hourFormat === '12')
-            this.currentHour = (newHour >= 13) ? (newHour - 12) : newHour;
-        
-        this.updateTime(event);
-                
-        event.preventDefault();
-    }
-    
-    decrementHour(event) {
-        let newHour = this.currentHour - this.props.stepHour;
-        if(this.props.hourFormat === '24')
-            this.currentHour = (newHour < 0) ? (24 + newHour) : newHour;        
-        else if(this.props.hourFormat === '12')
-            this.currentHour = (newHour <= 0) ? (12 + newHour) : newHour;
-            
-        this.updateTime(event);
-
-        event.preventDefault();
-    }
-    
-    incrementMinute(event) {
-        let newMinute = this.currentMinute + this.props.stepMinute;
-        this.currentMinute = (newMinute > 59) ? newMinute - 60 : newMinute;
-            
-        this.updateTime(event);
-                
-        event.preventDefault();
-    }
-    
-    decrementMinute(event) {
-        let newMinute = this.currentMinute - this.props.stepMinute;
-        this.currentMinute = (newMinute < 0) ? 60 + newMinute : newMinute;
-            
-        this.updateTime(event);
-            
-        event.preventDefault();
-    }
-    
-    incrementSecond(event) {
-        let newSecond = this.currentSecond + this.props.stepSecond;
-        this.currentSecond = (newSecond > 59) ? newSecond - 60 : newSecond;
-            
-        this.updateTime(event);
-                
-        event.preventDefault();
-    }
-    
-    decrementSecond(event) {
-        let newSecond = this.currentSecond - this.props.stepSecond;
-        this.currentSecond = (newSecond < 0) ? 60 + newSecond : newSecond;
-            
-        this.updateTime(event);
-            
-        event.preventDefault();
-    }
-    
-    updateTime(event) {
-        this.value = this.value||new Date();
-        if(this.props.hourFormat === '12' && this.pm && this.currentHour !== 12)
-            this.value.setHours(this.currentHour + 12);
-        else
-            this.value.setHours(this.currentHour);
-        
-        this.value.setMinutes(this.currentMinute);
-        this.value.setSeconds(this.currentSecond);
-        this.updateModel(event);
-        if (this.props.onSelect) {
-            this.props.onSelect({
-                originalEvent: event,
-                value: this.value
-            })
-        }
-        this.updateInputfield();
-    }
-    
-    toggleAMPM(event) {
-        this.pm = !this.pm;
-        this.updateTime(event);
-        event.preventDefault();
-    }
-    
-    onInput(event) {
-        try {
-            this.value = this.parseValueFromString(event.target.value);
-            this.updateUI();
-        } 
-        catch(err) {
-            //invalid date
-            this.value = null;
-            this._isValid = false;
-        }
-        
-        this.updateModel(event);
-        this.updateFilledState();
-    }
-    
-    parseValueFromString(text) {
-        let dateValue;
-        let parts = text.split(' ');
-        
-        if(this.props.timeOnly) {
-            dateValue = new Date();
-            this.populateTime(dateValue, parts[0], parts[1]);
-        }
-        else {
-            if(this.props.showTime) {
-                dateValue = this.parseDate(parts[0], this.props.dateFormat);
-                this.populateTime(dateValue, parts[1], parts[2]);
+    isSelected(dateMeta) {
+        if(this.props.value) {
+            if(this.isSingleSelection()) {
+                return this.isDateEquals(this.props.value, dateMeta);
             }
-            else {
-                 dateValue = this.parseDate(text, this.props.dateFormat);
-            }
-        }
-        
-        return dateValue;
-    }
-    
-    populateTime(value, timeString, ampm) {
-        let time = this.parseTime(timeString);
-        
-        if(this.props.hourFormat === '12') {
-            if(!ampm)
-                throw new Error('Invalid Time');
-            else if(ampm.toLowerCase() === 'PM' && time.hour !== 12)
-                value.setHours(time.hour + 12);
-        }
-        else {
-            value.setHours(time.hour);
-        }
-
-        value.setMinutes(time.minute);
-        value.setSeconds(time.second);
-    }
-    
-    updateUI() {
-        let val = this.value||this.props.defaultDate||new Date();
-        this.createMonth(val.getMonth(), val.getFullYear());
-        
-        if(this.props.showTime||this.props.timeOnly) {
-            let hours = val.getHours();
-            
-            if(this.props.hourFormat === '12') {
-                if(hours >= 12) {
-                    this.pm = true;
-                    this.currentHour = (hours === 12) ? 12 : hours - 12;
+            else if(this.isMultipleSelection()) {
+                let selected = false;
+                for(let date of this.props.value) {
+                    selected = this.isDateEquals(date, dateMeta);
+                    if(selected) {
+                        break;
+                    }
                 }
+                
+                return selected;
+            }
+            else if(this.isRangeSelection()) {
+                if(this.props.value[1])
+                    return this.isDateEquals(this.props.value[0], dateMeta) || this.isDateEquals(this.props.value[1], dateMeta) || this.isDateBetween(this.props.value[0], this.props.value[1], dateMeta);
                 else {
-                    this.pm = false;
-                    this.currentHour = (hours === 0) ? 12 : hours;
+                    return this.isDateEquals(this.props.value[0], dateMeta);
+                }
+                    
+            }
+        }
+        else {
+            return false;
+        }         
+    }
+
+    isMonthSelected(month) {
+        const viewDate = this.getViewDate();
+
+        if(this.props.value && this.props.value instanceof Date)
+            return this.props.value.getDate() === 1 && this.props.value.getMonth() === month && this.props.value.getFullYear() === viewDate.getFullYear();
+        else
+            return false;
+    }
+     
+    isDateEquals(value, dateMeta) {
+        if(value && value instanceof Date)
+            return value.getDate() === dateMeta.day && value.getMonth() === dateMeta.month && value.getFullYear() === dateMeta.year;
+        else
+            return false;
+    }
+    
+    isDateBetween(start, end, dateMeta) {
+        let between = false;
+        if(start && end) {
+            let date = new Date(dateMeta.year, dateMeta.month, dateMeta.day);
+            return start.getTime() <= date.getTime() && end.getTime() >= date.getTime();
+        }
+        
+        return between;
+    }
+    
+    isSingleSelection() {
+        return this.props.selectionMode === 'single';
+    }
+    
+    isRangeSelection() {
+        return this.props.selectionMode === 'range';
+    }
+    
+    isMultipleSelection() {
+        return this.props.selectionMode === 'multiple';
+    }
+    
+    isToday(today, day, month, year) {
+        return today.getDate() === day && today.getMonth() === month && today.getFullYear() === year;
+    }
+
+    isDateDisabled(day, month, year) {
+        if (this.props.disabledDates) {
+            for (let i = 0 ; i < this.props.disabledDates.length; i++) {
+                let disabledDate = this.props.disabledDates[i];
+
+                if (disabledDate.getFullYear() === year && disabledDate.getMonth() === month && disabledDate.getDate() === day) {
+                    return true;
                 }
             }
-            else {
-                this.currentHour = val.getHours();
+        }
+        
+        return false;
+    }
+    
+    isDayDisabled(day, month, year) {
+        if(this.props.disabledDays) {
+            let weekday = new Date(year, month, day);
+            let weekdayNumber = weekday.getDay();
+
+            return this.props.disabledDays.indexOf(weekdayNumber) !== -1;
+        }
+
+        return false;
+    }
+
+    getValueToRender() {
+        let formattedValue = '';
+
+        if(this.props.value) {
+            try {
+                if(this.isSingleSelection()) {
+                    formattedValue = this.formatDateTime(this.props.value);
+                }
+                else if(this.isMultipleSelection()) {
+                    for(let i = 0; i < this.props.value.length; i++) {
+                        let dateAsString = this.formatDateTime(this.props.value[i]);
+                        formattedValue += dateAsString;
+                        if(i !== (this.props.value.length - 1)) {
+                            formattedValue += ', ';
+                        }
+                    }
+                }
+                else if(this.isRangeSelection()) {
+                    if(this.props.value && this.props.value.length) {
+                        let startDate = this.props.value[0];
+                        let endDate = this.props.value[1];
+                        
+                        formattedValue = this.formatDateTime(startDate);
+                        if(endDate) {
+                            formattedValue += ' - ' + this.formatDateTime(endDate);
+                        }
+                    }
+                }
+            } 
+            catch(err) {
+                formattedValue = this.props.value;
             }
-            
-            this.currentMinute = val.getMinutes();
-            this.currentSecond = val.getSeconds();
-        }
-    }
-    
-    onDatePickerClick(event) {
-        this.closeOverlay = this.dateClick;
-    }
-    
-    showOverlay(inputfield) {
-        if(this.props.appendTo)
-            DomHandler.absolutePosition(this.overlay, inputfield);
-        else
-            DomHandler.relativePosition(this.overlay, inputfield);
-        
-        this.overlayVisible = true;
-        this.overlay.style.zIndex = String(DomHandler.getZindex());
-        this.overlay.style.display = 'block';
-
-        this.bindDocumentClickListener();
-    }
-
-    writeValue(value) {
-        this.value = value;
-        if(this.value && typeof this.value === 'string') {
-            this.value = this.parseValueFromString(this.value);
         }
         
-        this.updateInputfield();
-        this.updateUI();
+        return formattedValue;
     }
     
-    // Ported from jquery-ui datepicker formatDate    
+    formatDateTime(date) {
+        let formattedValue = null;
+        if(date) {
+            if(this.props.timeOnly) {
+                formattedValue = this.formatTime(date);
+            }
+            else {
+                formattedValue = this.formatDate(date, this.props.dateFormat);
+                if(this.props.showTime) {
+                    formattedValue += ' ' + this.formatTime(date);
+                }
+            }
+        }
+        
+        return formattedValue;
+    }
+
     formatDate(date, format) {
-        if(!date) {
-            return "";
+        if (!date) {
+            return '';
         }
 
-        let iFormat,
-        lookAhead = (match) => {
-            let matches = (iFormat + 1 < format.length && format.charAt(iFormat + 1) === match);
-            if(matches) {
+        let iFormat;
+        const lookAhead = (match) => {
+            const matches = (iFormat + 1 < format.length && format.charAt(iFormat + 1) === match);
+            if (matches) {
                 iFormat++;
             }
             return matches;
         },
-        formatNumber = (match, value, len) => {
-            let num = "" + value;
-            if(lookAhead(match)) {
-                while (num.length < len) {
-                    num = "0" + num;
+            formatNumber = (match, value, len) => {
+                let num = '' + value;
+                if (lookAhead(match)) {
+                    while (num.length < len) {
+                        num = '0' + num;
+                    }
                 }
-            }
-            return num;
-        },
-        formatName = (match, value, shortNames, longNames) => {
-            return (lookAhead(match) ? longNames[ value ] : shortNames[ value ]);
-        },
-        output = "",
-        literal = false;
+                return num;
+            },
+            formatName = (match, value, shortNames, longNames) => {
+                return (lookAhead(match) ? longNames[value] : shortNames[value]);
+            };
+        let output = '';
+        let literal = false;
 
-        if(date) {
-            for(iFormat = 0; iFormat < format.length; iFormat++) {
-                if(literal) {
-                    if(format.charAt(iFormat) === "'" && !lookAhead("'"))
+        if (date) {
+            for (iFormat = 0; iFormat < format.length; iFormat++) {
+                if (literal) {
+                    if (format.charAt(iFormat) === '\'' && !lookAhead('\'')) {
                         literal = false;
-                    else
+                    } else {
                         output += format.charAt(iFormat);
-                }
-                else {
+                    }
+                } else {
                     switch (format.charAt(iFormat)) {
-                        case "d":
-                            output += formatNumber("d", date.getDate(), 2);
+                        case 'd':
+                            output += formatNumber('d', date.getDate(), 2);
                             break;
-                        case "D":
-                            output += formatName("D", date.getDay(), this.props.locale.dayNamesShort, this.props.locale.dayNames);
+                        case 'D':
+                            output += formatName('D', date.getDay(), this.props.locale.dayNamesShort, this.props.locale.dayNames);
                             break;
-                        case "o":
-                            output += formatNumber("o",
-                                Math.round((new Date(date.getFullYear(), date.getMonth(), date.getDate()).getTime() - new Date(date.getFullYear(), 0, 0).getTime()) / 86400000), 3);
+                        case 'o':
+                            output += formatNumber('o',
+                            Math.round((
+                                new Date(date.getFullYear(), date.getMonth(), date.getDate()).getTime() -
+                                new Date(date.getFullYear(), 0, 0).getTime()) / 86400000), 3);
                             break;
-                        case "m":
-                            output += formatNumber("m", date.getMonth() + 1, 2);
+                        case 'm':
+                            output += formatNumber('m', date.getMonth() + 1, 2);
                             break;
-                        case "M":
-                            output += formatName("M", date.getMonth(), this.props.locale.monthNamesShort, this.props.locale.monthNames);
+                        case 'M':
+                            output += formatName('M',date.getMonth(), this.props.locale.monthNamesShort, this.props.locale.monthNames);
                             break;
-                        case "y":
-                            output += (lookAhead("y") ? date.getFullYear() :
-                                (date.getFullYear() % 100 < 10 ? "0" : "") + date.getFullYear() % 100);
+                        case 'y':
+                            output += lookAhead('y') ? date.getFullYear() : (date.getFullYear() % 100 < 10 ? '0' : '') + (date.getFullYear() % 100);
                             break;
-                        case "@":
+                        case '@':
                             output += date.getTime();
                             break;
-                        case "!":
+                        case '!':
                             output += date.getTime() * 10000 + this.ticksTo1970;
                             break;
-                        case "'":
-                            if(lookAhead("'"))
-                                output += "'";
-                            else
+                        case '\'':
+                            if (lookAhead('\'')) {
+                                output += '\'';
+                            } else {
                                 literal = true;
-
+                            }
                             break;
                         default:
                             output += format.charAt(iFormat);
@@ -738,10 +1286,10 @@ export class Calendar extends Component {
             }
         }
         return output;
-	}
+    }
     
     formatTime(date) {
-        if(!date) {
+        if (!date) {
             return '';
         }
         
@@ -750,43 +1298,108 @@ export class Calendar extends Component {
         let minutes = date.getMinutes();
         let seconds = date.getSeconds();
         
-        if(this.props.hourFormat === '12' && this.pm && hours !== 12) {
-            hours-=12;
+        if (this.props.hourFormat === '12' && hours > 11 && hours !== 12) {
+            hours -= 12;
         }
         
-        output += (hours < 10) ? '0' + hours : hours;
+        if (this.props.hourFormat === '12') {
+            output += hours === 0 ? 12 : (hours < 10) ? '0' + hours : hours;
+        } 
+        else {
+            output += (hours < 10) ? '0' + hours : hours;
+        }
         output += ':';
         output += (minutes < 10) ? '0' + minutes : minutes;
         
-        if(this.props.showSeconds) {
+        if (this.props.showSeconds) {
             output += ':';
             output += (seconds < 10) ? '0' + seconds : seconds;
         }
         
-        if(this.props.hourFormat === '12') {
-            output += this.pm ? ' PM' : ' AM';
+        if (this.props.hourFormat === '12') {
+            output += date.getHours() > 11 ? ' PM' : ' AM';
         }
         
         return output;
     }
-    
-    parseTime(value) {
-        let tokens= value.split(':');
-        let validTokentLength = this.props.showSeconds ? 3 : 2;
-        
-        if(tokens.length !== validTokentLength) {
-            throw new Error("Invalid time");
+
+    parseValueFromString(text) {
+        if(!text || text.trim().length === 0) {
+            return null;
         }
         
-        let h = parseInt(tokens[0],10);
-        let m = parseInt(tokens[1],10);
-        let s = this.props.showSeconds ? parseInt(tokens[2],10) : null;
+        let value;
         
-        if(isNaN(h) || isNaN(m) || h > 23 || m > 59 || (this.props.hourFormat === '12' && h > 12) || (this.props.showSeconds && (isNaN(s) || s > 59))) {
-            throw new Error("Invalid time");
+        if(this.isSingleSelection()) {
+            value = this.parseDateTime(text);
+        }
+        else if(this.isMultipleSelection()) {
+            let tokens = text.split(',');
+            value = [];
+            for(let token of tokens) {
+                value.push(this.parseDateTime(token.trim()));
+            }
+        }
+        else if(this.isRangeSelection()) {
+            let tokens = text.split(' - ');
+            value = [];
+            for(let i = 0; i < tokens.length; i++) {
+                value[i] = this.parseDateTime(tokens[i].trim());
+            }
+        }
+        
+        return value;
+    }
+
+    parseDateTime(text) {
+        let date;
+        let parts = text.split(' ');
+        
+        if(this.props.timeOnly) {
+            date = new Date();
+            this.populateTime(date, parts[0], parts[1]);
         }
         else {
-            if(this.props.hourFormat === '12' && h !== 12) {
+            if(this.props.showTime) {
+                date = this.parseDate(parts[0], this.props.dateFormat);
+                this.populateTime(date, parts[1], parts[2]);
+            }
+            else {
+                 date = this.parseDate(text, this.props.dateFormat);
+            }
+        }
+        
+        return date;
+    }
+
+    populateTime(value, timeString, ampm) {
+        if(this.props.hourFormat === '12' && (ampm !== 'PM' && ampm !== 'AM')) {
+            throw new Error('Invalid Time');
+        }
+        
+        let time = this.parseTime(timeString, ampm);
+        value.setHours(time.hour);
+        value.setMinutes(time.minute);
+        value.setSeconds(time.second);
+    }
+    
+    parseTime(value, ampm) {
+        let tokens = value.split(':');
+        let validTokenLength = this.props.showSeconds ? 3 : 2;
+        
+        if(tokens.length !== validTokenLength || tokens[0].length !== 2 || tokens[1].length !== 2 || (this.props.showSeconds && tokens[2].length !== 2)) {
+            throw new Error('Invalid time');
+        }
+        
+        let h = parseInt(tokens[0], 10);
+        let m = parseInt(tokens[1], 10);
+        let s = this.props.showSeconds ? parseInt(tokens[2], 10) : null;
+        
+        if(isNaN(h) || isNaN(m) || h > 23 || m > 59 || (this.props.hourFormat === '12' && h > 12) || (this.props.showSeconds && (isNaN(s) || s > 59))) {
+            throw new Error('Invalid time');
+        }
+        else {
+            if(this.props.hourFormat === '12' && h !== 12 && ampm === 'PM') {
                 h+= 12;
             }
             
@@ -794,47 +1407,47 @@ export class Calendar extends Component {
         }
     }
     
-    // Ported from jquery-ui datepicker parseDate 
+    // Ported from jquery-ui datepicker parseDate
     parseDate(value, format) {
-		if(format === null || value === null) {
-            throw new Error("Invalid arguments");
-		}
+        if(format == null || value == null) {
+            throw new Error('Invalid arguments');
+        }
 
-		value = (typeof value === "object" ? value.toString() : value + "");
-		if(value === "") {
-			return null;
-		}
+        value = (typeof value === "object" ? value.toString() : value + "");
+        if(value === "") {
+            return null;
+        }
 
-		let iFormat, dim, extra,
-		iValue = 0,
-		shortYearCutoff = (typeof this.props.shortYearCutoff !== "string" ? this.props.shortYearCutoff : new Date().getFullYear() % 100 + parseInt(this.props.shortYearCutoff, 10)),
-		year = -1,
-		month = -1,
-		day = -1,
-		doy = -1,
-		literal = false,
-		date,
-		lookAhead = (match) => {
-			let matches = (iFormat + 1 < format.length && format.charAt(iFormat + 1) === match);
-			if(matches) {
-				iFormat++;
-			}
-			return matches;
-		},
-		getNumber = (match) => {
-			let isDoubled = lookAhead(match),
-				size = (match === "@" ? 14 : (match === "!" ? 20 :
-				(match === "y" && isDoubled ? 4 : (match === "o" ? 3 : 2)))),
-				minSize = (match === "y" ? size : 1),
-				digits = new RegExp("^\\d{" + minSize + "," + size + "}"),
-				num = value.substring(iValue).match(digits);
-			if(!num) {
-                throw new Error("Missing number at position " + iValue);
-			}
-			iValue += num[ 0 ].length;
-			return parseInt(num[ 0 ], 10);
-		},
-		getName = (match, shortNames, longNames) => {
+        let iFormat, dim, extra,
+        iValue = 0,
+        shortYearCutoff = (typeof this.props.shortYearCutoff !== "string" ? this.props.shortYearCutoff : new Date().getFullYear() % 100 + parseInt(this.props.shortYearCutoff, 10)),
+        year = -1,
+        month = -1,
+        day = -1,
+        doy = -1,
+        literal = false,
+        date,
+        lookAhead = (match) => {
+            let matches = (iFormat + 1 < format.length && format.charAt(iFormat + 1) === match);
+            if(matches) {
+                iFormat++;
+            }
+            return matches;
+        },
+        getNumber = (match) => {
+            let isDoubled = lookAhead(match),
+                size = (match === "@" ? 14 : (match === "!" ? 20 :
+                (match === "y" && isDoubled ? 4 : (match === "o" ? 3 : 2)))),
+                minSize = (match === "y" ? size : 1),
+                digits = new RegExp("^\\d{" + minSize + "," + size + "}"),
+                num = value.substring(iValue).match(digits);
+            if(!num) {
+                throw new Error('Missing number at position ' + iValue);
+            }
+            iValue += num[ 0 ].length;
+            return parseInt(num[ 0 ], 10);
+        },
+        getName = (match, shortNames, longNames) => {
             let index = -1;
             let arr = lookAhead(match) ? longNames : shortNames;
             let names = [];
@@ -849,382 +1462,616 @@ export class Calendar extends Component {
             for(let i = 0; i < names.length; i++) {
                 let name = names[i][1];
                 if(value.substr(iValue, name.length).toLowerCase() === name.toLowerCase()) {
-    				index = names[i][0];
-    				iValue += name.length;
-    				break;
-    			}
+                    index = names[i][0];
+                    iValue += name.length;
+                    break;
+                }
             }
 
-			if(index !== -1) {
-				return index + 1;
-			} else {
-                throw new Error("Unknown name at position " + iValue);
-			}
-		},
-		checkLiteral = () => {
-			if(value.charAt(iValue) !== format.charAt(iFormat)) {
-                throw new Error("Unexpected literal at position " + iValue);
-			}
-			iValue++;
-		};
+            if(index !== -1) {
+                return index + 1;
+            } else {
+                throw new Error('Unknown name at position ' + iValue);
+            }
+        },
+        checkLiteral = () => {
+            if(value.charAt(iValue) !== format.charAt(iFormat)) {
+                throw new Error('Unexpected literal at position ' + iValue);
+            }
+            iValue++;
+        };
 
-		for (iFormat = 0; iFormat < format.length; iFormat++) {
-			if(literal) {
-				if(format.charAt(iFormat) === "'" && !lookAhead("'")) {
-					literal = false;
-				} else {
-					checkLiteral();
-				}
-			} else {
-				switch (format.charAt(iFormat)) {
-					case "d":
-						day = getNumber("d");
-						break;
-					case "D":
-						getName("D", this.props.locale.dayNamesShort, this.props.locale.dayNames);
-						break;
-					case "o":
-						doy = getNumber("o");
-						break;
-					case "m":
-						month = getNumber("m");
-						break;
-					case "M":
-						month = getName("M", this.props.locale.monthNamesShort, this.props.locale.monthNames);
-						break;
-					case "y":
-						year = getNumber("y");
-						break;
-					case "@":
-						date = new Date(getNumber("@"));
-						year = date.getFullYear();
-						month = date.getMonth() + 1;
-						day = date.getDate();
-						break;
-					case "!":
-						date = new Date((getNumber("!") - this.ticksTo1970) / 10000);
-						year = date.getFullYear();
-						month = date.getMonth() + 1;
-						day = date.getDate();
-						break;
-					case "'":
-						if(lookAhead("'")) {
-							checkLiteral();
-						} else {
-							literal = true;
-						}
-						break;
-					default:
-						checkLiteral();
-				}
-			}
-		}
-
-		if(iValue < value.length) {
-			extra = value.substr(iValue);
-			if(!/^\s+/.test(extra)) {
-                throw new Error("Extra/unparsed characters found in date: " + extra);
-			}
-		}
-
-		if(year === -1) {
-			year = new Date().getFullYear();
-		} else if(year < 100) {
-			year += new Date().getFullYear() - new Date().getFullYear() % 100 +
-				(year <= shortYearCutoff ? 0 : -100);
-		}
-
-		if(doy > -1) {
-			month = 1;
-			day = doy;
-			do {
-				dim = this.getDaysCountInMonth(year, month - 1);
-				if(day <= dim) {
-					break;
-				}
-				month++;
-				day -= dim;
-			} while (true);
-		}
-
-		date = this.daylightSavingAdjust(new Date(year, month - 1, day));
-		if(date.getFullYear() !== year || date.getMonth() + 1 !== month || date.getDate() !== day) {
-            throw new Error("Invalid date"); // E.g. 31/02/00
-		}
-		return date;
-	}
-    
-    daylightSavingAdjust(date) {
-        if(!date) {
-            return null;
+        if (this.props.view === 'month') {
+            day = 1;
         }
-        date.setHours(date.getHours() > 12 ? date.getHours() + 2 : 0);
+
+        for (iFormat = 0; iFormat < format.length; iFormat++) {
+            if(literal) {
+                if(format.charAt(iFormat) === "'" && !lookAhead("'")) {
+                    literal = false;
+                } else {
+                    checkLiteral();
+                }
+            } else {
+                switch (format.charAt(iFormat)) {
+                    case "d":
+                        day = getNumber("d");
+                        break;
+                    case "D":
+                        getName("D", this.props.locale.dayNamesShort, this.props.locale.dayNames);
+                        break;
+                    case "o":
+                        doy = getNumber("o");
+                        break;
+                    case "m":
+                        month = getNumber("m");
+                        break;
+                    case "M":
+                        month = getName("M", this.props.locale.monthNamesShort, this.props.locale.monthNames);
+                        break;
+                    case "y":
+                        year = getNumber("y");
+                        break;
+                    case "@":
+                        date = new Date(getNumber("@"));
+                        year = date.getFullYear();
+                        month = date.getMonth() + 1;
+                        day = date.getDate();
+                        break;
+                    case "!":
+                        date = new Date((getNumber("!") - this.ticksTo1970) / 10000);
+                        year = date.getFullYear();
+                        month = date.getMonth() + 1;
+                        day = date.getDate();
+                        break;
+                    case "'":
+                        if(lookAhead("'")) {
+                            checkLiteral();
+                        } else {
+                            literal = true;
+                        }
+                        break;
+                    default:
+                        checkLiteral();
+                }
+            }
+        }
+
+        if(iValue < value.length) {
+            extra = value.substr(iValue);
+            if(!/^\s+/.test(extra)) {
+                throw new Error('Extra/unparsed characters found in date: ' + extra);
+            }
+        }
+
+        if(year === -1) {
+            year = new Date().getFullYear();
+        } else if(year < 100) {
+            year += new Date().getFullYear() - new Date().getFullYear() % 100 +
+                (year <= shortYearCutoff ? 0 : -100);
+        }
+
+        if(doy > -1) {
+            month = 1;
+            day = doy;
+            do {
+                dim = this.getDaysCountInMonth(year, month - 1);
+                if(day <= dim) {
+                    break;
+                }
+                month++;
+                day -= dim;
+            } while (true);
+        }
+
+        date = this.daylightSavingAdjust(new Date(year, month - 1, day));
+                if (date.getFullYear() !== year || date.getMonth() + 1 !== month || date.getDate() !== day) {
+                    throw new Error('Invalid date'); // E.g. 31/02/00
+                }
+
         return date;
     }
-    
-    updateFilledState() {
-        this.filled = this.inputFieldValue && this.inputFieldValue !== '';
-    }
-    
-    bindDocumentClickListener() {
-        if(!this.documentClickListener) {
-            this.documentClickListener = this.docClickListener.bind(this);
-            document.addEventListener('click', this.documentClickListener);
-        }
-    }
-    
-    docClickListener() {
-        if(this.closeOverlay) {
-           this.overlayVisible = false;
-           this.overlay.style.display = 'none';
-        }
-                
-        this.closeOverlay = true;
-        this.dateClick = false;
+
+    renderBackwardNavigator() {
+        return (
+            <button className="p-datepicker-prev p-link" onClick={this.navBackward}>
+                <span className="p-datepicker-prev-icon pi pi-chevron-left"></span>
+            </button>
+        );
     }
 
-    unbindDocumentClickListener() {
-        if(this.documentClickListener) {
-            document.removeEventListener('click', this.documentClickListener);
-        }
+    renderForwardNavigator() {
+        return (
+            <button className="p-datepicker-next p-link" onClick={this.navForward}>
+                <span className="p-datepicker-next-icon pi pi-chevron-right"></span>
+            </button>
+        );
     }
-        
-    componentWillUnmount() {
-        this.unbindDocumentClickListener();
-        
-        if(!this.props.inline && this.props.appendTo) {
-            this.el.nativeElement.appendChild(this.overlay);
+
+    isInMinYear(viewDate) {
+        return this.props.minDate && this.props.minDate.getFullYear() === viewDate.getFullYear();
+    }
+
+    isInMaxYear(viewDate) {
+        return this.props.maxDate && this.props.maxDate.getFullYear() === viewDate.getFullYear();
+    }
+
+    renderTitleMonthElement(month) {
+        if (this.props.monthNavigator && this.props.view !== 'month') {
+            let viewDate = this.props.onViewDateChange ? this.props.viewDate : this.state.viewDate;
+            let viewMonth = viewDate.getMonth();
+
+            return (
+                <select className="p-datepicker-month" onChange={this.onMonthDropdownChange} value={viewMonth}>
+                    {
+                        this.props.locale.monthNames.map((month, index) => {
+                            if ((!this.isInMinYear(viewDate) || index >= this.props.minDate.getMonth()) && (!this.isInMaxYear(viewDate) || index <= this.props.maxDate.getMonth())) {
+                                return <option key={month} value={index}>{month}</option>
+                            }
+                            return null;
+                        })
+                    }
+                </select>
+            );
+        }
+        else {
+            return (
+                <span className="p-datepicker-month">{this.props.locale.monthNames[month]}</span>
+            );
         }
     }
 
-    componentWillMount() {
-        let date = this.props.defaultDate||new Date();        
-        let dayIndex = this.props.locale.firstDayOfWeek;
-        for(let i = 0; i < 7; i++) {
-            this.weekDays.push(this.props.locale.dayNamesMin[dayIndex]);
-            dayIndex = (dayIndex === 6) ? 0 : ++dayIndex;
-        }
-                
-        this.currentMonth = date.getMonth();
-        this.currentYear = date.getFullYear();
-        if(this.props.showTime) {
-            this.currentMinute = date.getMinutes();
-            this.currentSecond = date.getSeconds();
-            this.pm = date.getHours() > 11;
-            
-            if(this.props.hourFormat === '12')
-                this.currentHour = date.getHours() === 0 ? 12 : date.getHours() % 12;
-            else
-                this.currentHour = date.getHours();
-        }
-        else if(this.props.timeOnly) {
-            this.currentMinute = 0;
-            this.currentHour = 0;
-            this.currentSecond = 0;
-        }
-
-        this.createMonth(this.currentMonth, this.currentYear);
-        
-        this.ticksTo1970 = (((1970 - 1) * 365 + Math.floor(1970 / 4) - Math.floor(1970 / 100) +
-    		Math.floor(1970 / 400)) * 24 * 60 * 60 * 10000000);
-            
-        if(this.props.yearNavigator && this.props.yearRange) {
-            this.yearOptions = [];
-            let years = this.props.yearRange.split(':'),
-            yearStart = parseInt(years[0], 10),
-            yearEnd = parseInt(years[1], 10);
+    renderTitleYearElement(year) {
+        if (this.props.yearNavigator) {
+            let yearOptions = [];
+            const years = this.props.yearRange.split(':');
+            const yearStart = parseInt(years[0], 10);
+            const yearEnd = parseInt(years[1], 10);
             
             for(let i = yearStart; i <= yearEnd; i++) {
-                this.yearOptions.push(i);
+                yearOptions.push(i);
             }
-        }
-    }
-    
-    componentDidMount() {           
-        if(!this.props.inline && this.props.appendTo) {
-            if(this.props.appendTo === 'body')
-                document.body.appendChild(this.overlay);
-            else
-                DomHandler.appendChild(this.overlay, this.props.appendTo);
-        }
 
-        this.writeValue(this.props.value);
-    }
-    
+            let viewDate = this.props.onViewDateChange ? this.props.viewDate : this.state.viewDate;
+            let viewYear = viewDate.getFullYear();
 
-    render() {
-
-        var containerStyleClass = classNames('ui-calendar', this.props.styleClass, {
-            'ui-calendar-w-btn': this.props.showIcon
-        });
-
-        if (!this.props.inline) {
-            var inputElement = <InputText ref={(el) => this.inputfield = ReactDOM.findDOMNode(el)} type="text" required={this.props.required} onFocus={(e) => this.onInputFocus(this.inputfield, e)} onKeyDown={this.onInputKeydown.bind(this)} onClick={this.onInputClick.bind(this)}
-                onBlur={this.onInputBlur.bind(this)} readOnly={this.props.readonlyInput} onInput={this.onInput.bind(this)} style={this.props.inputStyle} className={this.props.inputStyleClass} placeholder={this.props.placeholder || ''} disabled={this.props.disabled} tabIndex={this.props.tabindex} />
-
-            if (this.props.showIcon) {
-                var buttonStyleClass = classNames('ui-datepicker-trigger', {
-                    'ui-state-disabled': this.props.disabled
-                });
-
-                var buttonElement = <Button type="button" icon={this.props.icon} onClick={(e) => this.onButtonClick(e, this.inputfield)}
-                    className={buttonStyleClass} disabled={this.props.disabled} />
-            }
-        }
-
-        var datepickerStyleClass = classNames('ui-datepicker ui-widget ui-widget-content ui-helper-clearfix ui-corner-all', {
-            'ui-datepicker-inline': this.props.inline,
-            'ui-shadow': !this.props.inline,
-            'ui-state-disabled': this.props.disabled,
-            'ui-datepicker-timeonly': this.props.timeOnly
-        }),
-        datepickerStyle = { 'display': this.props.inline ? 'inline-block' : (this.overlayVisible ? 'block' : 'none') };
-
-        /* Datepicker */
-        if (!this.props.timeOnly) {
-            /* datepicker header */
-            var prevLink = (<a className="ui-datepicker-prev ui-corner-all" href="#" onClick={this.prevMonth.bind(this)}>
-                                <span className="fa fa-angle-left"></span>
-                            </a>),
-                nextLink = (<a className="ui-datepicker-next ui-corner-all" href="#" onClick={this.nextMonth.bind(this)}>
-                                <span className="fa fa-angle-right"></span>
-                            </a>);
-
-            var currentMonthText = !this.props.monthNavigator && (<span className="ui-datepicker-month">{this.state.currentMonthText} </span>),
-                monthNav = this.props.monthNavigator && (<select className="ui-datepicker-month" value={this.state.currentMonth} onChange={(e) => this.onMonthDropdownChange(e.target.value)}>
-                                        {this.props.locale.monthNames.map((month, i) => <option key={"month_" + i} value={i}>{month}</option>)}
-                                    </select>),
-                yearNav = this.props.yearNavigator && (<select className="ui-datepicker-year" value={this.state.currentYear} onChange={(e) => this.onYearDropdownChange(e.target.value)}>
-                                        {this.yearOptions.map((year, i) => <option key={"year_" + i} value={year}>{year}</option>)}
-                                    </select>),
-                currentYearText = !this.props.yearNavigator && (<span className="ui-datepicker-year">{this.state.currentYear}</span>);
-
-            var title = (<div className="ui-datepicker-title">
-                            {currentMonthText}
-                            {monthNav}
-                            {yearNav}
-                            {currentYearText}
-                        </div>);
-
-            var datepickerHeader = (<div className="ui-datepicker-header ui-widget-header ui-helper-clearfix ui-corner-all">
-                                        {prevLink}
-                                        {nextLink}
-                                        {title}
-                                    </div>);
-
-            /* datepicker table */
-            var $this = this,
-                thead = (<thead>
-                            <tr>
-                                {this.weekDays.map((weekDay, i) => <th key={i} scope="col"><span>{weekDay}</span></th>)}
-                            </tr>
-                        </thead>),
-                tbody = (<tbody>
-                            {this.state.dates.map(function (week, rowIndex) {
-                                    var columns = week.map(function (date, columnIndex) {
-                                        var dateStyleClass = classNames({
-                                            'ui-datepicker-other-month ui-state-disabled': date.otherMonth,
-                                            'ui-datepicker-current-day': $this.isSelected(date),
-                                            'ui-datepicker-today': date.today
-                                        });
-
-                                        var dayStyleClass = classNames('ui-state-default', {
-                                            'ui-state-active': $this.isSelected(date),
-                                            'ui-state-highlight': date.today,
-                                            'ui-state-disabled': !date.selectable
-                                        }),
-                                        dayLinks = (date.otherMonth ? $this.props.showOtherMonths : true) && (<a href="#" className={dayStyleClass} onClick={(e) => $this.onDateSelect(e, date)}>{date.day}</a>);
-
-                                        return (<td className={dateStyleClass} key={rowIndex + '_' + columnIndex}>
-                                            {dayLinks}
-                                        </td>)
-                                    })
-
-                                    return (<tr key={rowIndex}>
-                                        {columns}
-                                    </tr>)
-                                })
+            return (
+                <select className="p-datepicker-year" onChange={this.onYearDropdownChange} value={viewYear}>
+                    {
+                        yearOptions.map(year => {
+                            if (!(this.props.minDate && this.props.minDate.getFullYear() > year) && !(this.props.maxDate && this.props.maxDate.getFullYear() < year)) {
+                                return <option key={year} value={year}>{year}</option>
                             }
-                        </tbody>);
-            
-            var table = (<table className="ui-datepicker-calendar">
-                            {thead}
-                            {tbody}
-                        </table>)
-
+                            return null;
+                        })
+                    }
+                </select>
+            );
         }
-
-        /* Timepicker */
-        if(this.props.showTime||this.props.timeOnly) {
-            var separator = (<div className="ui-separator">
-                                <a href="#">
-                                    <span className="fa fa-angle-up"></span>
-                                </a>
-                                <span>:</span>
-                                <a href="#">
-                                    <span className="fa fa-angle-down"></span>
-                                </a>
-                            </div>);
-
-            var hourPicker = (<div className="ui-hour-picker">
-                                <a href="#" onClick={this.incrementHour.bind(this)}>
-                                    <span className="fa fa-angle-up"></span>
-                                </a>
-                                <span style={{'display': this.currentHour < 10 ? 'inline': 'none'}}>0</span><span>{this.currentHour}</span>
-                                <a href="#" onClick={this.decrementHour.bind(this)}>
-                                    <span className="fa fa-angle-down"></span>
-                                </a>
-                            </div>),
-                minutePicker = (<div className="ui-minute-picker">
-                                <a href="#" onClick={this.incrementMinute.bind(this)}>
-                                    <span className="fa fa-angle-up"></span>
-                                </a>
-                                <span style={{'display': this.currentMinute < 10 ? 'inline': 'none'}}>0</span><span>{this.currentMinute}</span>
-                                <a href="#" onClick={this.decrementMinute.bind(this)}>
-                                    <span className="fa fa-angle-down"></span>
-                                </a>
-                            </div>),
-                secondPicker = this.props.showSeconds && (<div className="ui-second-picker">
-                                    <a href="#" onClick={this.incrementSecond.bind(this)}>
-                                        <span className="fa fa-angle-up"></span>
-                                    </a>
-                                    <span style={{'display': this.currentSecond < 10 ? 'inline': 'none'}}>0</span><span>{this.currentSecond}</span>
-                                    <a href="#" onClick={this.incrementSecond.bind(this)}>
-                                        <span className="fa fa-angle-down"></span>
-                                    </a>
-                                </div>),
-                ampmPicker = this.props.hourFormat==='12' && (<div className="ui-ampm-picker">
-                                    <a href="#" onClick={this.toggleAMPM.bind(this)}>
-                                        <span className="fa fa-angle-up"></span>
-                                    </a>
-                                    <span>{this.pm ? 'PM' : 'AM'}</span>
-                                    <a href="#" onClick={this.toggleAMPM.bind(this)}>
-                                        <span className="fa fa-angle-down"></span>
-                                    </a>
-                                </div>);
-
-                var timepickerHeader = (<div className="ui-timepicker ui-widget-header ui-corner-all">
-                                            {hourPicker}
-                                            {separator}
-                                            {minutePicker}
-                                            {this.props.showSeconds && separator}
-                                            {secondPicker}
-                                            {ampmPicker}
-                                        </div>);
+        else {
+            return (
+                <span className="p-datepicker-year">{year}</span>  
+            );
         }
+    }
 
+    renderTitle(monthMetaData) {
+        const month = this.renderTitleMonthElement(monthMetaData.month);
+        const year = this.renderTitleYearElement(monthMetaData.year);
 
         return (
-            <span className={containerStyleClass} style={this.props.style}>
-                {inputElement}
-                {buttonElement}
+            <div className="p-datepicker-title">
+                {month}
+                {year}
+            </div>
+        );
+    }
 
-                <div ref={(el) => this.overlay = ReactDOM.findDOMNode(el)} className={datepickerStyleClass} style={datepickerStyle} onClick={this.onDatePickerClick.bind(this)}>
-                    {datepickerHeader}
-                    {table}
-                    {timepickerHeader}
+    renderDayNames(weekDays) {
+        const dayNames = weekDays.map(weekDay =>
+            (
+                <th key={weekDay} scope="col">
+                    <span>{weekDay}</span>
+                </th>
+            )
+        );
+
+        if (this.props.showWeek) {
+            const weekHeader = (
+                <th scope="col" key={'wn'} className="p-datepicker-weekheader p-disabled">
+                    <span>{this.props.locale['weekHeader']}</span>
+                </th>
+            );
+
+            return [weekHeader, ...dayNames];
+        }
+        else {
+            return dayNames;
+        }
+    }
+
+    renderDateCellContent(date, className) {
+        const content = this.props.dateTemplate ? this.props.dateTemplate(date) : date.day;
+
+        return (
+            <span className={className} onClick={e => this.onDateSelect(e, date)}>
+                {content}
+            </span>
+        );
+    }
+
+    renderWeek(weekDates, weekNumber) {
+        const week = weekDates.map((date) => {
+            const selected = this.isSelected(date);
+            const cellClassName = classNames({'p-datepicker-other-month': date.otherMonth, 'p-datepicker-today': date.today});
+            const dateClassName = classNames({'p-highlight': selected, 'p-disabled': !date.selectable});
+            const content = this.renderDateCellContent(date, dateClassName);
+
+            return (
+                <td key={date.day} className={cellClassName}>
+                    {content}
+                </td>
+            );
+        });
+
+        if (this.props.showWeek) {
+            const weekNumberCell = (               
+                <td key={'wn' + weekNumber} className="p-datepicker-weeknumber">
+                    <span className="p-disabled">
+                        {weekNumber}
+                    </span>
+                </td>
+            );
+
+            return [weekNumberCell, ...week];
+        }
+        else {
+            return week;
+        }
+    }
+
+    renderDates(monthMetaData) {
+        return monthMetaData.dates.map((weekDates, index) => {
+            return (
+                <tr key={index}>
+                    {this.renderWeek(weekDates, monthMetaData.weekNumbers[index])}
+                </tr>
+            );
+        });
+    }
+
+    renderDateViewGrid(monthMetaData, weekDays) {
+        const dayNames = this.renderDayNames(weekDays);
+        const dates = this.renderDates(monthMetaData);
+
+        return (
+            <div className="p-datepicker-calendar-container">
+                <table className="p-datepicker-calendar">
+                    <thead>
+                        <tr>
+                            {dayNames}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {dates}
+                    </tbody>
+                </table>
+            </div>
+        );
+    }
+
+    renderMonth(monthMetaData, index) {
+        const weekDays = this.createWeekDays();
+        const backwardNavigator = (index === 0) ? this.renderBackwardNavigator(): null;
+        const forwardNavigator = (this.props.numberOfMonths === 1) || (index === this.props.numberOfMonths -1) ? this.renderForwardNavigator(): null;
+        const title = this.renderTitle(monthMetaData);
+        const dateViewGrid = this.renderDateViewGrid(monthMetaData, weekDays);
+        const header = this.props.headerTemplate ? this.props.headerTemplate() : null;
+
+        return (
+            <div key={monthMetaData.month} className="p-datepicker-group">
+                <div className="p-datepicker-header">
+                    {header}
+                    {backwardNavigator}
+                    {forwardNavigator}
+                    {title}
                 </div>
-            </span >
+                {dateViewGrid}
+            </div>
+        );
+    }
+
+    renderMonths(monthsMetaData) {
+        return (
+            monthsMetaData.map((monthMetaData, index) => {
+                return this.renderMonth(monthMetaData, index);
+            })
+        );
+    }
+
+    renderDateView() {
+        let viewDate = this.props.onViewDateChange ? this.props.viewDate : this.state.viewDate;
+        const monthsMetaData = this.createMonths(viewDate.getMonth(), viewDate.getFullYear());
+        const months = this.renderMonths(monthsMetaData);
+
+        return (
+            <React.Fragment>
+               {months}
+            </React.Fragment>
+        );
+    }
+
+    renderMonthViewMonth(index) {
+        const className = classNames('p-monthpicker-month', {'p-highlight': this.isMonthSelected(index)});
+        const monthName = this.props.locale.monthNamesShort[index];
+
+        return (
+            <span key={monthName} className={className} onClick={event => this.onMonthSelect(event, index)}>
+                {monthName}                                
+            </span>
+        );
+    }
+
+    renderMonthViewMonths() {
+        let months = [];
+        for(let i = 0; i <= 11; i++) {
+            months.push(this.renderMonthViewMonth(i));
+        }
+
+        return months;
+    }
+
+    renderMonthView() {
+        const backwardNavigator = this.renderBackwardNavigator();
+        const forwardNavigator = this.renderForwardNavigator();
+        const yearElement = this.renderTitleYearElement(this.getViewDate().getFullYear());
+        const months = this.renderMonthViewMonths();
+        
+        return (
+            <React.Fragment>
+                <div className="p-datepicker-header">
+                    {backwardNavigator}
+                    {forwardNavigator}
+                    <div className="p-datepicker-title">
+                        {yearElement}
+                    </div>
+                </div>
+                <div className="p-monthpicker">
+                    {months}
+                </div>
+            </React.Fragment>  
+        );
+    }
+
+    renderDatePicker() {
+        if (!this.props.timeOnly) {
+            if (this.props.view === 'date') {
+                return this.renderDateView();
+            } 
+            else if (this.props.view === 'month') {
+                return this.renderMonthView();
+            }
+            else {
+                return null;
+            }
+        }
+    }
+
+    renderHourPicker() {
+        let currentTime = (this.props.value && this.props.value instanceof Date) ? this.props.value : this.getViewDate();
+        let hour = currentTime.getHours();
+
+        if (this.props.hourFormat === '12') {
+            if (hour === 0) 
+                hour = 12;
+            else if (hour > 11 && hour !== 12)
+                hour = hour - 12;
+        }
+
+        const hourDisplay = hour < 10 ? '0' + hour: hour;
+        
+        return (
+            <div className="p-hour-picker">
+                <button className="p-link" onClick={this.incrementHour}>
+                    <span className="pi pi-chevron-up"></span>
+                </button>
+                <span>{hourDisplay}</span>
+                <button className="p-link" onClick={this.decrementHour}>
+                    <span className="pi pi-chevron-down"></span>
+                </button>
+            </div>
+        );
+    }
+
+    renderMinutePicker() {
+        let currentTime = (this.props.value && this.props.value instanceof Date) ? this.props.value : this.getViewDate();
+        let minute = currentTime.getMinutes();
+        let minuteDisplay = minute < 10 ? '0' + minute: minute;
+        
+        return (
+            <div className="p-minute-picker">
+                <button className="p-link" onClick={this.incrementMinute}>
+                    <span className="pi pi-chevron-up"></span>
+                </button>
+                <span>{minuteDisplay}</span>
+                <button className="p-link" onClick={this.decrementMinute}>
+                    <span className="pi pi-chevron-down"></span>
+                </button>
+            </div>
+        );
+    }
+
+    renderSecondPicker() {
+        if (this.props.showSeconds) {
+            let currentTime = (this.props.value && this.props.value instanceof Date) ? this.props.value : this.getViewDate();
+            let second = currentTime.getSeconds();
+            let secondDisplay = second < 10 ? '0' + second: second;
+            
+            return (
+                <div className="p-second-picker">
+                    <button className="p-link" onClick={this.incrementSecond}>
+                        <span className="pi pi-chevron-up"></span>
+                    </button>
+                    <span>{secondDisplay}</span>
+                    <button className="p-link" onClick={this.decrementSecond}>
+                        <span className="pi pi-chevron-down"></span>
+                    </button>
+                </div>
+            );
+        }
+        else {
+            return null;
+        }
+    }
+
+    renderAmPmPicker() {
+        if (this.props.hourFormat === '12') {
+            let currentTime = (this.props.value && this.props.value instanceof Date) ? this.props.value : this.getViewDate();
+            let hour = currentTime.getHours();
+            let display = hour > 11 ? 'PM' : 'AM';
+
+            return (
+                <div className="p-ampm-picker">
+                    <button className="p-link" onClick={this.toggleAmPm}>
+                        <span className="pi pi-chevron-up"></span>
+                    </button>
+                    <span>{display}</span>
+                    <button className="p-link" onClick={this.toggleAmPm}>
+                        <span className="pi pi-chevron-down"></span>
+                    </button>
+                </div>
+            );
+        }
+        else {
+            return null;
+        }
+    }
+
+    renderSeparator() {
+        return (
+            <div className="p-separator">
+                <span className="p-separator-spacer">
+                    <span className="pi pi-chevron-up"></span>
+                </span>
+                <span>:</span>
+                <span className="p-separator-spacer">
+                    <span className="pi pi-chevron-down"></span>
+                </span>
+            </div>
+        );
+    }
+
+    renderTimePicker() {
+        if (this.props.showTime || this.props.timeOnly) {
+            return (
+                <div className="p-timepicker">
+                     {this.renderHourPicker()}
+                     {this.renderSeparator()}
+                     {this.renderMinutePicker()}
+                     {this.props.showSeconds && this.renderSeparator()}
+                     {this.renderSecondPicker()}
+                     {this.props.hourFormat === '12' && this.renderSeparator()}
+                     {this.renderAmPmPicker()}
+                </div>
+            )
+        }
+        else {
+            return null;
+        }
+    }
+
+    renderInputElement() {
+        if (!this.props.inline) {
+            const className = classNames('p-inputtext p-component', this.props.inputClassName);
+            const value = this.getValueToRender();
+
+            return (
+                <InputText ref={(el) => this.inputElement = ReactDOM.findDOMNode(el)} id={this.props.inputId} name={this.props.name} value={value} type="text" className={className} style={this.props.inputStyle} 
+                    readOnly={this.props.readOnlyInput} disabled={this.props.disabled} tabIndex={this.props.tabIndex} required={this.props.required} autoComplete="off" placeholder={this.props.placeholder}
+                    onChange={this.onInputChange} onFocus={this.onInputFocus} onBlur={this.onInputBlur} onKeyDown={this.onInputKeyDown} />
+            );
+        }
+        else {
+            return null;
+        }
+    }
+
+    renderButton() {
+        if (this.props.showIcon) {
+            return (
+                <Button type="button" icon={this.props.icon} onClick={this.onButtonClick} tabIndex="-1"
+                    disabled={this.props.disabled} className="p-datepicker-trigger p-calendar-button" />
+            );
+        }
+        else {
+            return null;
+        }
+    }
+
+    renderButtonBar() {
+        if (this.props.showButtonBar) {
+            return (
+                <div className="p-datepicker-buttonbar">
+                    <Button type="button" label={this.props.locale.today} onClick={this.onTodayButtonClick} className={this.props.todayButtonClassName} />
+                    <Button type="button" label={this.props.locale.clear} onClick={this.onClearButtonClick} className={this.props.todayButtonClassName} />
+                </div>
+            );
+        }
+        else {
+            return null;
+        }
+    }
+
+    renderFooter() {
+        if (this.props.footerTemplate) {
+            const content = this.props.footerTemplate();
+
+            return (
+                <div className="p-datepicker-footer">
+                    {content}
+                </div>
+            )
+        }
+        else {
+            return null;
+        }
+    }
+   
+    render() {
+        const className = classNames('p-calendar', this.props.className, {
+            'p-calendar-w-btn': this.props.showIcon, 
+            'p-calendar-timeonly': this.props.timeOnly,
+            'p-inputwrapper-filled': this.props.value
+        });
+        const panelClassName = classNames('p-datepicker p-component', this.props.panelClassName, {
+            'p-datepicker-inline': this.props.inline,
+            'p-input-overlay': !this.props.inline,
+            'p-shadow': !this.props.inline,
+            'p-disabled': this.props.disabled,
+            'p-datepicker-timeonly': this.props.timeOnly,
+            'p-datepicker-multiple-month': this.props.numberOfMonths > 1, 
+            'p-datepicker-monthpicker': (this.props.view === 'month'), 
+            'p-datepicker-touch-ui': this.props.touchUI
+        });
+        const input = this.renderInputElement();
+        const button = this.renderButton();
+        const datePicker = this.renderDatePicker();
+        const timePicker = this.renderTimePicker();
+        const buttonBar = this.renderButtonBar();
+        const footer = this.renderFooter();
+
+        return (
+            <span ref={(el) => this.container = el} id={this.props.id} className={className} style={this.props.style}>
+                {input}
+                {button}
+                <CalendarPanel ref={(el) => this.panel = ReactDOM.findDOMNode(el)} className={panelClassName} style={this.props.panelStyle} 
+                        appendTo={this.props.appendTo}>
+                    {datePicker}
+                    {timePicker}
+                    {buttonBar}
+                    {footer}
+                </CalendarPanel>
+            </span>
         );
     }
 }

@@ -1,25 +1,22 @@
 import React, {Component} from 'react';
-import {Link} from 'react-router';
+import {Link} from 'react-router-dom';
 import {TriStateCheckbox} from '../../components/tristatecheckbox/TriStateCheckbox';
 import {TabView,TabPanel} from '../../components/tabview/TabView';
-import {CodeHighlight} from '../../components/codehighlight/CodeHighlight';
+import {CodeHighlight} from '../codehighlight/CodeHighlight';
 
 export class TriStateCheckboxDemo extends Component {
 
     constructor(props) {
         super(props);
-        this.state = {value: null};
-        this.onStateChange = this.onStateChange.bind(this);
-    }
-
-    onStateChange(e) {
-        this.setState({value: e.value});
+        this.state = {
+            value: null
+        };
     }
 
     render() {
         return (
             <div>
-                <div className="content-section">
+                <div className="content-section introduction">
                     <div className="feature-intro">
                         <h1>TriStateCheckbox</h1>
                         <p>TriStateCheckbox is used to select either "true", "false" or "null" as the value.</p>
@@ -27,9 +24,10 @@ export class TriStateCheckboxDemo extends Component {
                 </div>
 
                 <div className="content-section implementation">
-                    <h3 className="first">Value: {this.state.value + ''} </h3>
-                    <TriStateCheckbox onChange={this.onStateChange} value={this.state.value}></TriStateCheckbox>
+                    <h3 className="first">Value: {this.state.value + ''}</h3>
+                    <TriStateCheckbox value={this.state.value} onChange={(e) => this.setState({value: e.value})} />
                 </div>
+
                 <TriStateCheckboxDoc></TriStateCheckboxDoc>
             </div>
         );
@@ -38,44 +36,33 @@ export class TriStateCheckboxDemo extends Component {
 
 class TriStateCheckboxDoc extends Component {
 
+    shouldComponentUpdate(){
+        return false;
+    }
+
     render() {
         return (
-            <div className="content-section source">
+            <div className="content-section documentation">
                 <TabView>
                     <TabPanel header="Documentation">
                         <h3>Import</h3>
 <CodeHighlight className="language-javascript">
 {`
-import {TriStateCheckbox} from 'primereact/components/tristatecheckbox/TriStateCheckbox';
+import {TriStateCheckbox} from 'primereact/tristatecheckbox';
 
 `}
 </CodeHighlight>
 
                         <h3>Getting Started</h3>
-                        <p>TriStateCheckbox is used as a controlled input with checked and onChange properties.</p>
-<CodeHighlight className="language-markup">
+                        <p>TriStateCheckbox is used as a controlled input with <i>checked</i> and <i>onChange</i> properties.</p>
+<CodeHighlight className="language-jsx">
 {`
-<TriStateCheckbox onChange={this.onStateChange} value={this.state.value}></TriStateCheckbox>
+<TriStateCheckbox value={this.state.value} onChange={(e) => this.setState({value: e.value})} />
 
 `}
 </CodeHighlight>
 
-<CodeHighlight className="language-javascript">
-{`
- constructor(props) {
-    super(props);
-    this.state = {value: null};
-    this.onStateChange = this.onStateChange.bind(this);
-}
-
-onStateChange(e) {
-    this.setState({value: e.value});
-}
-
-`}
-</CodeHighlight>
-
-                    <h3>Attributes</h3>
+                    <h3>Properties</h3>
                     <div className="doc-tablewrapper">
                         <table className="doc-table">
                             <thead>
@@ -88,10 +75,52 @@ onStateChange(e) {
                             </thead>
                             <tbody>
                                 <tr>
+                                    <td>id</td>
+                                    <td>string</td>
+                                    <td>null</td>
+                                    <td>Unique identifier of the element.</td>
+                                </tr>
+                                <tr>
+                                    <td>inputId</td>
+                                    <td>string</td>
+                                    <td>null</td>
+                                    <td>Unique identifier of the native checkbox element.</td>
+                                </tr>
+                                <tr>
                                     <td>value</td>
                                     <td>any</td>
                                     <td>null</td>
                                     <td>Value of the TriStateCheckbox.</td>
+                                </tr>
+                                <tr>
+                                    <td>name</td>
+                                    <td>string</td>
+                                    <td>null</td>
+                                    <td>Name of the checkbox element .</td>
+                                </tr>
+                                <tr>
+                                    <td>style</td>
+                                    <td>string</td>
+                                    <td>null</td>
+                                    <td>Inline style of the element.</td>
+                                </tr>
+                                <tr>
+                                    <td>className</td>
+                                    <td>string</td>
+                                    <td>null</td>
+                                    <td>Style class of the element.</td>
+                                </tr>
+                                <tr>
+                                    <td>tooltip</td>
+                                    <td>any</td>
+                                    <td>null</td>
+                                    <td>Content of the tooltip.</td>
+                                </tr>
+                                <tr>
+                                    <td>tooltipOptions</td>
+                                    <td>object</td>
+                                    <td>null</td>
+                                    <td>Configuration of the tooltip, refer to the tooltip documentation for more information.</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -110,7 +139,7 @@ onStateChange(e) {
                             <tbody>
                                 <tr>
                                     <td>onChange</td>
-                                    <td>event.originalEvent: Original browser event <br />
+                                    <td>event.originalEvent: Browser event <br />
                                         event.value: Current Value 
                                     </td>
                                     <td>Callback to invoke on value change</td>
@@ -131,19 +160,19 @@ onStateChange(e) {
                             </thead>
                             <tbody>
                                 <tr>
-                                    <td>ui-chkbox</td>
+                                    <td>p-chkbox</td>
                                     <td>Container element</td>
                                 </tr>
                                 <tr>
-                                    <td>ui-tristatechkbox</td>
+                                    <td>p-tristatechkbox</td>
                                     <td>Container element</td>
                                 </tr>
                                 <tr>
-                                    <td>ui-chkbox-box</td>
+                                    <td>p-chkbox-box</td>
                                     <td>Container of icon.</td>
                                 </tr>
                                 <tr>
-                                    <td>ui-chkbox-icon</td>
+                                    <td>p-chkbox-icon</td>
                                     <td>Icon element.</td>
                                 </tr>
                             </tbody>
@@ -154,24 +183,27 @@ onStateChange(e) {
                     <p>None.</p>
                 </TabPanel>
                 <TabPanel header="Source">
+                    <a href="https://github.com/primefaces/primereact/tree/master/src/showcase/tristatecheckbox" className="btn-viewsource" target="_blank" rel="noopener noreferrer">
+                        <span>View on GitHub</span>
+                    </a>
 <CodeHighlight className="language-javascript">
 {`
+import React, {Component} from 'react';
+import {TriStateCheckbox} from 'primereact/tristatecheckbox';
+
 export class TriStateCheckboxDemo extends Component {
 
     constructor(props) {
         super(props);
-        this.state = {value: null};
-        this.onStateChange = this.onStateChange.bind(this);
-    }
-
-    onStateChange(e) {
-        this.setState({value: e.value});
+        this.state = {
+            value: null
+        };
     }
 
     render() {
         return (
             <div>
-                <div className="content-section">
+                <div className="content-section introduction">
                     <div className="feature-intro">
                         <h1>TriStateCheckbox</h1>
                         <p>TriStateCheckbox is used to select either "true", "false" or "null" as the value.</p>
@@ -179,10 +211,9 @@ export class TriStateCheckboxDemo extends Component {
                 </div>
 
                 <div className="content-section implementation">
-                    <h3 className="first">Value: {this.state.value + ''} </h3>
-                    <TriStateCheckbox onChange={this.onStateChange} value={this.state.value}></TriStateCheckbox>
+                    <h3 className="first">Value: {this.state.value + ''}</h3>
+                    <TriStateCheckbox value={this.state.value} onChange={(e) => this.setState({value: e.value})} />
                 </div>
-                <TriStateCheckboxDoc></TriStateCheckboxDoc>
             </div>
         );
     }

@@ -3,17 +3,20 @@ import PropTypes from 'prop-types';
 import ReactDOM from 'react-dom';
 import DomHandler from '../utils/DomHandler';
 import { InputText } from '../inputtext/InputText';
+import Tooltip from "../tooltip/Tooltip";
 
 export class InputMask extends Component {
 
     static defaultProps = {
+        id: null,
+        value: null,
         type: 'text',
         mask: null,
         slotChar: '_',
         autoClear: true,
         unmask: false,
         style: null,
-        styleClass: null,
+        className: null,
         placeholder: null,
         size: null,
         maxlength: null,
@@ -21,17 +24,23 @@ export class InputMask extends Component {
         disabled: false,
         readonly: false,
         name: null,
-        onComplete: null
+        required: false,
+        tooltip: null,
+        tooltipOptions: null,
+        onComplete: null,
+        onChange: null
     }
 
-    static propsTypes = {
+    static propTypes = {
+        id: PropTypes.string,
+        value: PropTypes.string,
         type: PropTypes.string,
         mask: PropTypes.string,
         slotChar: PropTypes.string,
         autoClear: PropTypes.bool,
         unmask: PropTypes.bool,
-        style: PropTypes.string,
-        styleClass: PropTypes.string,
+        style: PropTypes.object,
+        className: PropTypes.string,
         placeholder: PropTypes.string,
         size: PropTypes.number,
         maxlength: PropTypes.number,
@@ -39,7 +48,22 @@ export class InputMask extends Component {
         disabled: PropTypes.bool,
         readonly: PropTypes.bool,
         name: PropTypes.string,
-        onComplete: PropTypes.func
+        required: PropTypes.bool,
+        tooltip: PropTypes.string,
+        tooltipOptions: PropTypes.object,
+        onComplete: PropTypes.func,
+        onChange: PropTypes.func
+    }
+
+    constructor(props) {
+        super(props);
+        
+        this.onFocus = this.onFocus.bind(this);
+        this.onBlur = this.onBlur.bind(this);
+        this.onKeyDown = this.onKeyDown.bind(this);
+        this.onKeyPress = this.onKeyPress.bind(this);
+        this.onInput = this.onInput.bind(this);
+        this.handleInputChange = this.handleInputChange.bind(this);
     }
 
     caret(first, last) {
@@ -167,9 +191,7 @@ export class InputMask extends Component {
         }
 
         if (this.props.onComplete && this.isCompleted()) {
-            this.props.onComplete({
-                originalEvent: e
-            })
+            this.props.onComplete(e);
         }
     }
 
@@ -190,7 +212,7 @@ export class InputMask extends Component {
         if (this.props.readonly) {
             return;
         }
-
+        
         let k = e.which || e.keyCode,
             pos,
             begin,
@@ -258,8 +280,8 @@ export class InputMask extends Component {
 
                     if (/android/i.test(DomHandler.getUserAgent())) {
                         //Path for CSP Violation on FireFox OS 1.1
-                        let proxy = function () {
-                            this.caret.bind(this, next)();
+                        let proxy = () => {
+                            this.caret(next);
                         };
 
                         setTimeout(proxy, 0);
@@ -297,6 +319,7 @@ export class InputMask extends Component {
     }
 
     checkVal(allow) {
+        this.isValueChecked = true;
         //try to place characters where they belong
         let test = this.input.value,
             lastMatch = -1,
@@ -388,16 +411,14 @@ export class InputMask extends Component {
             return;
         }
 
-        setTimeout(() => {
-            var pos = this.checkVal(true);
-            this.caret(pos);
-            this.updateModel(event);
-            if (this.props.onComplete && this.isCompleted()) {
-                this.props.onComplete({
-                    originalEvent: event
-                })
-            }
-        }, 0);
+        var pos = this.checkVal(true);
+        this.caret(pos);
+        this.updateModel(event);
+        if (this.props.onComplete && this.isCompleted()) {
+            this.props.onComplete({
+                originalEvent: event
+            })
+        }
     }
 
     getUnmaskedValue() {
@@ -417,16 +438,49 @@ export class InputMask extends Component {
             var val = this.props.unmask ? this.getUnmaskedValue() : e.target.value;
             this.props.onChange({
                 originalEvent: e,
-                value: (this.defaultBuffer !== val) ? val : ''
+                value: (this.defaultBuffer !== val) ? val : '',
+                stopPropagation : () =>{},
+                preventDefault : () =>{},
+                target: {
+                    name: this.props.name,
+                    id: this.props.id,
+                    value : (this.defaultBuffer !== val) ? val : '',
+                }
             })
         }
     }
 
     updateFilledState() {
-        this.filled = this.input && this.input.value !== '';
+        if (this.input && this.input.value && this.input.value.length > 0)
+            DomHandler.addClass(this.input, 'p-filled');
+        else
+            DomHandler.removeClass(this.input, 'p-filled');
     }
 
-    componentWillMount() {
+    updateValue() {
+        if (this.input) {
+            if (this.props.value == null) {
+                this.input.value = '';
+            }
+            else {
+                this.input.value = this.props.value;
+                this.checkVal();
+            }
+
+            setTimeout(() => {
+                if(this.input) {
+                    this.writeBuffer();
+                    this.checkVal();
+                }
+            }, 10);
+
+            this.focusText = this.input.value;
+        }
+        
+        this.updateFilledState();
+    }
+
+    init() {
         this.tests = [];
         this.partialPosition = this.props.mask.length;
         this.len = this.props.mask.length;
@@ -475,35 +529,55 @@ export class InputMask extends Component {
     }
 
     componentDidMount() {
-        var _this = this;
-        this.value = this.props.value;
+        this.init();
+        this.updateValue();
 
-        if (this.input) {
-            if (this.value === undefined || this.value === null) {
-                this.input.value = '';
-            }
-            else {
-                this.input.value = this.value;
-                this.checkVal();
-            }
-
-            setTimeout(() => {
-                _this.writeBuffer();
-                _this.checkVal();
-            }, 10);
-
-            this.focusText = this.input.value;
+        if (this.props.tooltip) {
+            this.renderTooltip();
         }
-        
-        this.updateFilledState();
+    }
+
+    componentDidUpdate(prevProps) {
+        if (this.props.tooltip && prevProps.tooltip !== this.props.tooltip) {
+            if (this.tooltip)
+                this.tooltip.updateContent(this.props.tooltip);
+            else
+                this.renderTooltip();
+        }
+
+        if (this.input.value !== this.props.value) {
+            this.updateValue();
+        }
+    }
+
+    componentWillUnmount() {
+        if (this.tooltip) {
+            this.tooltip.destroy();
+            this.tooltip = null;
+        }
+    }
+
+    shouldComponentUpdate(nextProps, nextState) {
+        if(nextProps.value === this.props.value) {
+            return false;
+        }
+        return true;
+    }
+
+    renderTooltip() {
+        this.tooltip = new Tooltip({
+            target: this.input,
+            content: this.props.tooltip,
+            options: this.props.tooltipOptions
+        });
     }
 
     render() {
         return (
-            <InputText ref={(el) => this.input = ReactDOM.findDOMNode(el)} type={this.props.type} name={this.props.name} style={this.props.style} className={this.props.styleClass} placeholder={this.props.placeholder}
+            <InputText id={this.props.id} ref={(el) => this.input = ReactDOM.findDOMNode(el)} type={this.props.type} name={this.props.name} style={this.props.style} className={this.props.className} placeholder={this.props.placeholder}
                 size={this.props.size} maxLength={this.props.maxlength} tabIndex={this.props.tabindex} disabled={this.props.disabled} readOnly={this.props.readonly}
-                onFocus={this.onFocus.bind(this)} onBlur={this.onBlur.bind(this)} onKeyDown={this.onKeyDown.bind(this)} onKeyPress={this.onKeyPress.bind(this)}
-                onInput={this.onInput.bind(this)} onPaste={this.handleInputChange.bind(this)} />
+                onFocus={this.onFocus} onBlur={this.onBlur} onKeyDown={this.onKeyDown} onKeyPress={this.onKeyPress}
+                onInput={this.onInput} onPaste={this.handleInputChange} required={this.props.required} />
         );
     }
 

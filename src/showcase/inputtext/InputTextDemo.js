@@ -1,16 +1,18 @@
 import React, {Component} from 'react';
-import {Link} from 'react-router';
+import {Link} from 'react-router-dom';
 import {InputText} from '../../components/inputtext/InputText';
-import {Button} from '../../components/button/Button';
 import {TabView,TabPanel} from '../../components/tabview/TabView';
-import {CodeHighlight} from '../../components/codehighlight/CodeHighlight';
+import {CodeHighlight} from '../codehighlight/CodeHighlight';
 
 export class InputTextDemo extends Component {
         
     constructor() {
         super();
-        this.state = {};
-        this.toggle = this.toggle.bind(this);
+        this.state = {
+            value1: '',
+            value2: '',
+            value3: ''
+        };
     }
 
     toggle() {
@@ -20,22 +22,26 @@ export class InputTextDemo extends Component {
     render() {
         return (
             <div>
-                <div className="content-section">
+                <div className="content-section introduction">
                     <div className="feature-intro">
                         <h1>InputText</h1>
-                        <p>InputText is an extension to standard input element with theming.</p>
+                        <p>InputText is an extension to standard input element with theming and keyfiltering.</p>
                     </div>
                 </div>
 
                 <div className="content-section implementation">
-                    <h3>Basic</h3>
-                    <InputText onChange={(e) => this.setState({value: e.target.value})}/>
-                    <span style={{marginLeft:'.5em'}}>{this.state.value}</span>
+                    <h3 className="first">Basic</h3>
+                    <InputText value={this.state.value1} onChange={(e) => this.setState({value1: e.target.value})} />
+                    <span style={{marginLeft:'.5em'}}>{this.state.value1}</span>
 
-                    <h3>Disabled</h3>
-                    <InputText disabled={this.state.disabled} style={{marginRight:'.25em'}}/>
+                    <h3>Floating Label</h3>
+                    <span className="p-float-label">
+                        <InputText id="float-input" type="text" size="30" value={this.state.value2} onChange={(e) => this.setState({value2: e.target.value})} />
+                        <label htmlFor="float-input">Username</label>
+                    </span>
 
-                    <Button label="Toggle" onClick={this.toggle}/>
+                    <h3>KeyFilter - Positive Number Only</h3>
+                    <InputText type="text" keyfilter="pint" value={this.state.value3} onChange={(e) => this.setState({value3: e.target.value})} />
                 </div>
 
                 <InputTextDoc />
@@ -46,40 +52,88 @@ export class InputTextDemo extends Component {
 
 class InputTextDoc extends Component {
 
+    shouldComponentUpdate() {
+        return false;
+    }
+
     render() {
         return (
-            <div className="content-section source">
+            <div className="content-section documentation">
                 <TabView>
                     <TabPanel header="Documentation">
                         <h3>Import</h3>
 <CodeHighlight className="language-javascript">
 {`
-import {InputText} from 'primereact/components/inputtext/InputText';
+import {InputText} from 'primereact/inputtext';
 
 `}
 </CodeHighlight>
 
                         <h3>Getting Started</h3>
-                        <p>Component is defined using the InputText element with standard attributes of an input element.</p>
-                        
-<CodeHighlight className="language-markup">
+                        <p>InputText is used as a controlled input with <i>value</i> and <i>onChange</i> properties.</p>
+<CodeHighlight className="language-jsx">
 {`
-<InputText />
+<InputText value={this.state.value} onChange={(e) => this.setState({value: e.target.value})} />
 
 `}
 </CodeHighlight>
 
-                        <h3>Controlled Input</h3>
-                        <p>InputText is used as a controlled input with value and onChange properties.</p>
-<CodeHighlight className="language-markup">
-{`
-<InputText onChange={(e) => this.setState({value: e.target.value})}/>
+                        <h3>Float Label</h3>
+                        <p>A floating label is implemented by wrapping the input and the label inside a container having <i>.p-float-label</i> style class.</p>
+                        <CodeHighlight className="language-jsx">
+                            {`
+<span className="p-float-label">
+    <InputText id="in" value={this.state.value} onChange={(e) => this.setState({value: e.target.value})} />
+    <label htmlFor="in">Username</label>
+</span>
 
 `}
-</CodeHighlight>
+                        </CodeHighlight>
 
-                        <h3>Attributes</h3>
-                        <p>InputText passes any attribute to the underlying input element.</p>
+                        <h3>KeyFilter</h3>
+                        <p>InputText has built-in key filtering support to block certain keys, refer to <Link to="/keyfilter">keyfilter</Link> page for more information.</p>
+
+                        <h3>Properties</h3>
+                        <p>InputText passes any valid attribute to the underlying input element. Extended properties are as follows;</p>
+                        <h3>Properties</h3>
+                        <div className="doc-tablewrapper">
+                            <table className="doc-table">
+                                <thead>
+                                    <tr>
+                                        <th>Name</th>
+                                        <th>Type</th>
+                                        <th>Default</th>
+                                        <th>Description</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>keyfilter</td>
+                                        <td>string/regex</td>
+                                        <td>null</td>
+                                        <td>Format definition of the keys to block.</td>
+                                    </tr>
+                                    <tr>
+                                        <td>validateOnly</td>
+                                        <td>boolean</td>
+                                        <td>false</td>
+                                        <td>When enabled, instead of blocking keys, input is validated internally to test against the regular expression.</td>
+                                    </tr>
+                                    <tr>
+                                        <td>tooltip</td>
+                                        <td>any</td>
+                                        <td>null</td>
+                                        <td>Content of the tooltip.</td>
+                                    </tr>
+                                    <tr>
+                                        <td>tooltipOptions</td>
+                                        <td>object</td>
+                                        <td>null</td>
+                                        <td>Configuration of the tooltip, refer to the tooltip documentation for more information.</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
                         
                         <h3>Styling</h3>
                         <p>Following is the list of structural style classes, for theming classes visit <Link to="/theming">theming</Link> page.</p>
@@ -93,7 +147,7 @@ import {InputText} from 'primereact/components/inputtext/InputText';
                                 </thead>
                                 <tbody>
                                     <tr>
-                                        <td>ui-inputtext</td>
+                                        <td>p-inputtext</td>
                                         <td>Input element</td>
                                     </tr>
                                 </tbody>
@@ -105,14 +159,22 @@ import {InputText} from 'primereact/components/inputtext/InputText';
                     </TabPanel>
 
                     <TabPanel header="Source">
+                        <a href="https://github.com/primefaces/primereact/tree/master/src/showcase/inputtext" className="btn-viewsource" target="_blank" rel="noopener noreferrer">
+                            <span>View on GitHub</span>
+                        </a>
 <CodeHighlight className="language-javascript">
 {`
+import React, {Component} from 'react';
+import {Link} from 'react-router-dom';
+import {InputText} from 'primereact/inputtext';
+
 export class InputTextDemo extends Component {
         
     constructor() {
         super();
-        this.state = {};
-        this.toggle = this.toggle.bind(this);
+        this.state = {
+            value: null
+        };
     }
 
     toggle() {
@@ -122,22 +184,28 @@ export class InputTextDemo extends Component {
     render() {
         return (
             <div>
-                <div className="content-section">
+                <div className="content-section introduction">
                     <div className="feature-intro">
                         <h1>InputText</h1>
-                        <p>InputText is an extension to standard input element with theming.</p>
+                        <p>InputText is an extension to standard input element with theming and keyfiltering.</p>
                     </div>
                 </div>
 
                 <div className="content-section implementation">
-                    <h3>Basic</h3>
-                    <InputText onChange={(e) => this.setState({value: e.target.value})}/>
-                    <span style={{marginLeft:'.5em'}}>{this.state.value}</span>
+                    <div className="content-section implementation">
+                        <h3 className="first">Basic</h3>
+                        <InputText value={this.state.value1} onChange={(e) => this.setState({value1: e.target.value})} />
+                        <span style={{marginLeft:'.5em'}}>{this.state.value1}</span>
 
-                    <h3>Disabled</h3>
-                    <InputText disabled={this.state.disabled} style={{marginRight:'.25em'}}/>
+                        <h3>Floating Label</h3>
+                        <span className="p-float-label">
+                            <InputText id="float-input" type="text" size="30" value={this.state.value2} onChange={(e) => this.setState({value2: e.target.value})} />
+                            <label htmlFor="float-input">Username</label>
+                        </span>
 
-                    <Button label="Toggle" onClick={this.toggle}/>
+                        <h3>KeyFilter - Positive Number Only</h3>
+                        <InputText type="text" keyfilter="pint" value={this.state.value3} onChange={(e) => this.setState({value3: e.target.value})} />
+                    </div>
                 </div>
             </div>
         )

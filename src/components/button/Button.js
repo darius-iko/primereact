@@ -1,51 +1,103 @@
 import React, {Component} from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
+import Tooltip from "../tooltip/Tooltip";
 
 export class Button extends Component {
 
     static defaultProps = {
         label: null,
         icon: null,
-        iconPos: 'left'
+        iconPos: 'left',
+        tooltip: null,
+        tooltipOptions: null
     }
 
     static propTypes = {
         label: PropTypes.string,
         icon: PropTypes.string,
-        iconPos: PropTypes.string
+        iconPos: PropTypes.string,
+        tooltip: PropTypes.string,
+        tooltipOptions: PropTypes.object
     };
 
-    render() {
-        var styleClass = classNames('ui-button ui-widget ui-state-default ui-corner-all', this.props.className, {
-                'ui-button-text-only': !this.props.icon && this.props.label,
-                'ui-button-icon-only': this.props.icon && !this.props.label,
-                'ui-button-text-icon-left': this.props.icon && this.props.iconPos === 'left',
-                'ui-button-text-icon-right': this.props.icon && this.props.iconPos === 'right',
-                'ui-state-disabled': this.props.disabled
-        }),
-        iconStyleClass = null;
+    componentDidMount() {
+        if (this.props.tooltip) {
+            this.renderTooltip();
+        }
+    }
 
-        var buttonProps = Object.assign({}, this.props);
+    componentDidUpdate(prevProps) {
+        if (this.props.tooltip && prevProps.tooltip !== this.props.tooltip) {
+            if (this.tooltip)
+                this.tooltip.updateContent(this.props.tooltip);
+            else
+                this.renderTooltip();
+        }
+    }
+ 
+    componentWillUnmount() {
+        if (this.tooltip) {
+            this.tooltip.destroy();
+            this.tooltip = null;
+        }
+    }
+ 
+    renderTooltip() {
+        this.tooltip = new Tooltip({
+            target: this.element,
+            content: this.props.tooltip,
+            options: this.props.tooltipOptions
+        });
+    }
+
+    renderIcon() {
+        if(this.props.icon) {
+            let className = classNames(this.props.icon, 'p-c', {
+                'p-button-icon-left': this.props.iconPos !== 'right',
+                'p-button-icon-right': this.props.iconPos === 'right'
+            });
+
+            return (
+                <span className={className}></span>
+            );
+        }
+        else {
+            return null;
+        }
+    }
+
+    renderLabel() {
+        const buttonLabel = this.props.label||'p-btn';
+
+        return (
+            <span className="p-button-text p-c">{buttonLabel}</span>
+        );
+    }
+
+    render() {
+        let className = classNames('p-button p-component', this.props.className, {
+                'p-button-icon-only': this.props.icon && !this.props.label,
+                'p-button-text-icon-left': this.props.icon && this.props.label && this.props.iconPos === 'left',
+                'p-button-text-icon-right': this.props.icon && this.props.label && this.props.iconPos === 'right',
+                'p-button-text-only': !this.props.icon && this.props.label,
+                'p-disabled': this.props.disabled
+        });
+        let icon = this.renderIcon();
+        let label = this.renderLabel();
+
+        let buttonProps = Object.assign({}, this.props);
         delete buttonProps.iconPos;
         delete buttonProps.icon;
         delete buttonProps.label;
-
-        if (buttonProps.type !== 'submit' && buttonProps.type !== 'reset') {
-          buttonProps.type = 'button'
-        }
-
-        if(this.props.icon) {
-            iconStyleClass = classNames(this.props.icon, 'ui-c fa fa-fw', {
-                'ui-button-icon-left': this.props.iconPos !== 'right',
-                'ui-button-icon-right': this.props.iconPos === 'right'
-            });
-        }
+        delete buttonProps.tooltip;
+        delete buttonProps.tooltipOptions;
 
         return (
-            <button {...buttonProps} className={styleClass}>
-                {this.props.icon && <span className={iconStyleClass}></span>}
-                <span className="ui-button-text ui-c">{this.props.label || 'ui-button'}</span>
+            <button ref={(el) => this.element = el} {...buttonProps} className={className}>
+                {this.props.iconPos === 'left' && icon}
+                {label}
+                {this.props.iconPos === 'right' && icon}
                 {this.props.children}
             </button>
         );

@@ -314,6 +314,7 @@ export class App extends Component {
     render() {
         return (
             <div className="layout-wrapper">
+
                 <div className="layout-topbar">
                     <span ref={el => this.menuButton = el} className="menu-button" tabIndex="0" onClick={this.onMenuButtonClick} onKeyDown={this.onMenuButtonKeyDown}>
                         <i className="pi pi-bars"></i>
@@ -336,11 +337,12 @@ export class App extends Component {
                                 <li><a href="https://www.primefaces.org/designer/primereact"><i className="pi pi-fw pi-cog" /><span>Designer</span></a></li>
                                 <li><Link to="/icons" onClick={this.onThemesMenuRouteChange}><i className="pi pi-fw pi-search"/><span>Icons</span></Link></li>
                                 <li className="topbar-submenu-header">PREMIUM TEMPLATES</li>
+                                <li><a href="https://www.primefaces.org/layouts/sapphire-react"><img src="showcase/resources/images/layouts/themeswitcher-roma.jpg" alt="Roma" /><span>Roma</span><span className="theme-badge new">new</span></a></li>
                                 <li><a href="https://www.primefaces.org/layouts/sapphire-react"><img src="showcase/resources/images/layouts/themeswitcher-sapphire.png" alt="Sapphire (Material)" /><span>Sapphire</span><span className="theme-badge material">material</span></a></li>
                                 <li><a href="https://www.primefaces.org/layouts/serenity-react"><img src="showcase/resources/images/layouts/themeswitcher-serenity.png" alt="Serenity (Material)" /><span>Serenity</span><span className="theme-badge material">material</span></a></li>
                                 <li><a href="https://www.primefaces.org/layouts/ultima-react"><img src="showcase/resources/images/layouts/themeswitcher-ultima.png" alt="Ultima (Material)" /><span>Ultima</span><span className="theme-badge material">material</span></a></li>
                                 <li><a href="https://www.primefaces.org/layouts/avalon-react"><img src="showcase/resources/images/layouts/themeswitcher-avalon.png" alt="Avalon (Bootstrap)" /><span>Avalon</span><span className="theme-badge bootstrap">bootstrap</span></a></li>
-                                <li><a href="https://www.primefaces.org/layouts/babylon-react"><img src="showcase/resources/images/layouts/themeswitcher-babylon.png" alt="Babylon" /><span>Babylon</span><span className="theme-badge new">new</span></a></li>
+                                <li><a href="https://www.primefaces.org/layouts/babylon-react"><img src="showcase/resources/images/layouts/themeswitcher-babylon.png" alt="Babylon" /><span>Babylon</span></a></li>
                                 <li><a href="https://www.primefaces.org/layouts/apollo-react"><img src="showcase/resources/images/layouts/themeswitcher-apollo.png" alt="Apollo" /><span>Apollo</span></a></li>
                                 <li className="topbar-submenu-header">FREE TEMPLATES</li>
                                 <li><a href="https://www.primefaces.org/sigma-react"><img src="showcase/resources/images/layouts/themeswitcher-sigma.png" alt="Sigma" /><span>Sigma</span></a></li>
@@ -365,8 +367,6 @@ export class App extends Component {
                 <div id="layout-sidebar" ref={el => this.sidebar = el} className={classNames({'active': this.state.mobileMenuActive})} onClick={this.onSidebarClick}>
                     <AppMenu />
                 </div>
-
-                <div className={classNames({'layout-mask': this.state.mobileMenuActive})}></div>
 
                 <div id="layout-content">
                     <Route exact path="/" component={HomeComponent} />
@@ -505,6 +505,7 @@ export class App extends Component {
                     </div>
                 </div>
 
+                <div className={classNames({'layout-mask': this.state.mobileMenuActive})}></div>
             </div>
         );
     }

@@ -426,6 +426,12 @@ export class DataTableDemo extends Component {
                             <td>false</td>
                             <td>Displays icons to edit row.</td>
                         </tr>
+                        <tr>
+                            <td>exportable</td>
+                            <td>boolean</td>
+                            <td>true</td>
+                            <td>Defines whether the column is exported or not.</td>
+                        </tr>
                     </tbody>
                 </table>
             </div>
@@ -2148,6 +2154,14 @@ export class DataTableStateDemo extends Component {
                             <td>cell</td>
                             <td>Defines editing mode, options are "cell" and "row".</td>
                         </tr>
+                        <tr>
+                            <td>exportFunction</td>
+                            <td>function</td>
+                            <td>null</td>
+                            <td>A function to implement custom export. Need to return string value. <br />
+                                event.data: Field data. <br />
+                                event.rows: Column field.</td>
+                        </tr>
                     </tbody>
                 </table>
             </div>
@@ -2319,6 +2333,11 @@ export class DataTableStateDemo extends Component {
                         </tr>
                     </thead>
                     <tbody>
+                        <tr>
+                            <td>reset</td>
+                            <td>-</td>
+                            <td>Resets sort, filter, paginator and columnorder state.</td>
+                        </tr>
                         <tr>
                             <td>exportCSV</td>
                             <td>-</td>

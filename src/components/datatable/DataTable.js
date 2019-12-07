@@ -99,7 +99,8 @@ export class DataTable extends Component {
         rowEditorValidator: null,
         onRowEditInit: null,
         onRowEditSave: null,
-        onRowEditCancel: null
+        onRowEditCancel: null,
+        exportFunction: null
     }
 
     static propTypes = {
@@ -187,7 +188,8 @@ export class DataTable extends Component {
         rowEditorValidator: PropTypes.func,
         onRowEditInit: PropTypes.func,
         onRowEditSave: PropTypes.func,
-        onRowEditCancel: PropTypes.func
+        onRowEditCancel: PropTypes.func,
+        exportFunction: PropTypes.func
     };
 
     constructor(props) {
@@ -447,7 +449,7 @@ export class DataTable extends Component {
 
     onSort(event) {
         let sortField = event.sortField;
-        let sortOrder = (this.getSortField() === event.sortField) ? this.getSortOrder() * -1 : this.props.defaultSortOrder;
+        let sortOrder = this.props.defaultSortOrder;
         let multiSortMeta;
 
         this.columnSortable = event.sortable;
@@ -456,11 +458,20 @@ export class DataTable extends Component {
         if(this.props.sortMode === 'multiple') {
             let metaKey = event.originalEvent.metaKey || event.originalEvent.ctrlKey;
             multiSortMeta = this.getMultiSortMeta();
+
+            if (multiSortMeta && multiSortMeta instanceof Array) {
+                const sortMeta = multiSortMeta.find(sortMeta => sortMeta.field === sortField);
+                sortOrder = sortMeta ? sortMeta.order * -1 : sortOrder;
+            }
+
             if(!multiSortMeta || !metaKey) {
                 multiSortMeta = [];
             }
 
             this.addSortMeta({field: sortField, order: sortOrder}, multiSortMeta);
+        }
+        else {
+            sortOrder = (this.getSortField() === sortField) ? this.getSortOrder() * -1 : sortOrder;
         }
         
         if (this.props.onSort) {
@@ -908,6 +919,7 @@ export class DataTable extends Component {
     
                 if (this.props.onColReorder) {
                     this.props.onColReorder({
+                        originalEvent: event,
                         dragIndex: dragIndex,
                         dropIndex: dropIndex,
                         columns: columns
@@ -958,8 +970,26 @@ export class DataTable extends Component {
         data.forEach((record, i) => {
             csv += '\n';
             for(let i = 0; i < columns.length; i++) {
-                if(columns[i].props.field) {
-                    csv += '"' + ObjectUtils.resolveFieldData(record, columns[i].props.field) + '"';
+                let column = columns[i],
+                field = column.props.field;
+
+                if (column.props.exportable && field) {
+                    let cellData = ObjectUtils.resolveFieldData(record, field);
+                    
+                    if (cellData != null) {
+                        if (this.props.exportFunction) {
+                            cellData = this.props.exportFunction({
+                                data: cellData,
+                                field: field
+                            });
+                        }
+                        else
+                            cellData = String(cellData).replace(/"/g, '""');
+                    }
+                    else
+                        cellData = '';
+
+                    csv += '"' + cellData + '"';
                     
                     if(i < (columns.length - 1)) {
                         csv += this.props.csvSeparator;
@@ -1232,6 +1262,30 @@ export class DataTable extends Component {
     
     getTotalRecords(data) {
         return this.props.lazy ? this.props.totalRecords : data ? data.length : 0;
+    }
+
+    reset() {
+        let state = {};
+        if (!this.props.onPage) {
+            state.first = this.props.first;
+            state.rows = this.props.rows;
+        }
+
+        if (!this.props.onSort) {
+            state.sortField = this.props.sortField;
+            state.sortOrder = this.props.sortOrder;
+            state.multiSortMeta = this.props.multiSortMeta;
+        }
+
+        if (!this.props.onFilter) {
+            state.filters = this.props.filters;
+        }
+
+        this.resetColumnOrder();
+
+        if (Object.keys(state).length) {
+            this.setState(state);
+        }
     }
 
     resetColumnOrder() {
